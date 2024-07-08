@@ -33,52 +33,27 @@
         <h1 class="display-3"> Movie Search Data Base</h1>
         <p class="lead">Click the button below to find a movie!</p>
       </header>
-      <div class="container">
-        <div class="text-center mb-5">
-          <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#formModal">Search</button>
+      
+      <form class="form">
+        <div class="mb-3">
+          <label for="movieTitleInput" class="form-label">Movie Title:</label><br>
+          <input type="text" class="form-control" id="movieName" aria-describedby="emailHelp">
         </div>
-        
-    
-        <!-- Modal for movie info subbmission -->
-        <div class="modal fade" 
-        id="formModal" 
-        tabindex="-1" 
-        aria-labelledby="addTaskModalLabel" 
-        aria-hidden="true">
-          
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="formModalLabel">Find A Movie</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-    
-              <div class="modal-body">
-                <form id="taskForm">
-                  <div class="mb-3">
-                    <label for="taskTitle" class="form-label">Movie Title</label>
-                    <input 
-                    type="text" 
-                    class="form-control" 
-                    id="movieTitle" required>
-                  </div>
-    
-                  <div class="mb-3">
-                    <label for="taskDueDate" class="form-label">Genre</label>
-                    <input type="text" class="form-control" id="Genre" required>
-                  </div>
-    
-                  <div class="mb-3">
-                    <label for="taskDescription" class="form-label">Year</label>
-                    <textarea class="form-control" id="Year" required></textarea>
-                  </div>
-    
-                  <button type="submit" class="btn btn-primary">Submit</button>
-                </form>
-              </div>
-            </div>
+
+        <div class="mb-3">
+          <label for="genreInput" class="form-label">Genre:</label><br>
+          <input type="text" class="form-control" id="movieGenre">
+        </div>
+
+        <div class="mb-3">
+            <label for="yearInput" class="form-label">Year:</label><br>
+            <input type="text" class="form-control" id="year">
           </div>
-        </div>
+
+        
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+        
     
 
     <script
