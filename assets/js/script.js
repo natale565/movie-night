@@ -1,12 +1,13 @@
 const searchFormEl = document.getElementById('taskForm');
 
+const movieTitle = document.getElementById('movieTitle').value;
+const genre = document.getElementById('genre').value;
+ const year = document.getElementById('year').value;
+
 searchFormEl.addEventListener('submit', function(event) {
     event.preventDefault();
-    
-    const movieTitle = document.getElementById('movieTitle').value;
-    const genre = document.getElementById('genre').value;
-    const year = document.getElementById('year').value;
-    
+
+
     if (movieTitle !== "") {
         console.log("Movie title is filled out. Form can be submitted.");
     
