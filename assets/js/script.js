@@ -18,29 +18,3 @@ window.addEventListener('click', function(event) {
     }
 });
 
-
-function fetchOmdbData(data){
-const movieTitle = document.getElementbyId('movieInput').value.trim();
- if (movieTitle === '') {
-    alert('Please enter movie title');
-    return;
- }
- const apiUrl = `http://www.omdbapi.com/?apikey=${apiKey}&t=${encodeURIComponent(movieTitle)}`;
-
- fetch(apiUrl)
- .then(response => response.json())
- .then(data => {
-    if (data.response === 'True') {
-        const movieDetails = `
-        <h2> ${data.Title} ($data.Year) </h2>
-        <p>Plot:${data.plot}</p>
-        <p>IMDB Rating:${data.imdbRating}</p>`
-    console.log(movieDetails)
-    } else {
-        console.log('Movie not found');
-    }
- })
- .catch(error => {
-    console.error('Error fetching data', error);
- });
-}
