@@ -211,6 +211,13 @@ function getStreaming(streamLocation, apiKey, apiUrl) {
     });
   } );
 
+
+ // Hide the modal after adding task
+  $('#formModal').modal('hide');
+
+
+  
+
     })
     .then(data => {
         console.log(data);
@@ -235,3 +242,4 @@ function getStreaming(streamLocation, apiKey, apiUrl) {
 //     </div>
 //   `;
 // }
+

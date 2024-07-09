@@ -55,3 +55,8 @@
     box-shadow: 3px 3px;
     transform: translate(-1px, -1px);
 }
+
+.container{
+    margin: 80px;
+    width: 400px;
+}
