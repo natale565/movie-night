@@ -34,11 +34,18 @@
         <p class="lead">Click the button below to find a movie!</p>
       </header>
       
+
+      <div class="card">
+        <h3 class="card-header text-uppercase">Search By Movie Title</h3>
+        <form id="movieName" class="card-body">
+          <label class="form-label" for="movieTitleInput">Movie Title:</label>
+          <input id="movieTitleInput" type="text" autofocus="true" class="form-input" />
+          <button type="submit" class="btn">Search</button>
+        </form>
+      </div>
+
+      
       <form class="form" id="form">
-        <div class="mb-3">
-          <label for="movieTitleInput" class="form-label">Movie Title:</label><br>
-          <input id="movieTitleInput" type="text" class="form-control" id="movieName" aria-describedby="emailHelp">
-        </div>
 
         <div class="mb-3">
           <label for="genreInput" class="form-label">Genre:</label><br>
