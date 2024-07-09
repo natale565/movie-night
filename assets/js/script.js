@@ -90,3 +90,9 @@ document.getElementById('form').addEventListener('submit', function(event) {
       source: availableGenres
     });
   } );
+
+ // Hide the modal after adding task
+  $('#formModal').modal('hide');
+
+
+  
