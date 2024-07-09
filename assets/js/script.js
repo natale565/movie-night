@@ -102,6 +102,52 @@ function getMovieDetails(movieTitle, apiKey, apiUrl) {
             throw new Error('Network response was not ok');
         }
         return response.json();
+
+      })
+      .then(data => {
+        if (data.Response === 'False') {
+          throw new Error(data.Error || 'Movie not found');
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+        alert('Failed to fetch movie data. Please try again.');
+      });
+  });
+  
+  const formEl = $('#form');
+  const genreInputEl = $('#movieGenre')
+
+  $( function() {
+    const availableGenres = [
+      "ActionScript",
+      "AppleScript",
+      "Asp",
+      "BASIC",
+      "C",
+      "C++",
+      "Clojure",
+      "COBOL",
+      "ColdFusion",
+      "Erlang",
+      "Fortran",
+      "Groovy",
+      "Haskell",
+      "Java",
+      "JavaScript",
+      "Lisp",
+      "Perl",
+      "PHP",
+      "Python",
+      "Ruby",
+      "Scala",
+      "Scheme"
+    ];
+    $( "#movieGenre" ).autocomplete({
+      source: availableGenres
+    });
+  } );
+
     })
     .then(data => {
         console.log(data);
@@ -111,3 +157,4 @@ function getMovieDetails(movieTitle, apiKey, apiUrl) {
         console.error('Error fetching movie details:', error);
     });
 }
+

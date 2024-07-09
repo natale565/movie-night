@@ -35,6 +35,23 @@
 
 
 .form{
-    margin: 0 auto;
+    margin: 80px;
     width: 250px;
+}
+
+.card{
+    margin: 80px;
+    width: 400px;
+}
+
+.btn {
+    font-size: 1.3rem;
+    text-decoration:none;
+    margin: 5px 0;
+    color: white;
+    border: black;
+    outline: none;
+    background-color: blue;
+    box-shadow: 3px 3px;
+    transform: translate(-1px, -1px);
 }
