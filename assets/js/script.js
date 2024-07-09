@@ -51,6 +51,7 @@ document.getElementById('form').addEventListener('submit', function(event) {
         if (data.Response === 'False') {
           throw new Error(data.Error || 'Movie not found');
         }
+        console.log(data);
       })
       .catch(error => {
         console.error('Error fetching data:', error);
