@@ -218,3 +218,45 @@ $(document).ready(function() {
 //     </div>
 //   `;
 // }
+ // Get the modal element
+ let modal = document.getElementById('formModal');
+
+ // Get the button that opens the modal
+ let openModalBtn = document.querySelector('[data-bs-target="#formModal"]');
+ 
+ // Get the form inside the modal
+ let form = document.getElementById('taskForm');
+ 
+ // Get the input fields inside the form
+ let movieGenreInput = document.getElementById('movieGenre');
+ let movieYearInput = document.getElementById('movieYear');
+ 
+ // When the user clicks the button to open the modal
+ openModalBtn.addEventListener('click', function() {
+   modal.style.display = 'block';
+ });
+ 
+ // When the user clicks the close button or outside of the modal, close it
+ modal.addEventListener('click', function(event) {
+   if (event.target === modal) {
+     modal.style.display = 'none';
+   }
+ });
+ 
+ // When the form is submitted
+ form.addEventListener('submit', function(event) {
+   event.preventDefault(); // Prevent the default form submission
+ 
+   // Get the values entered by the user
+   let movieGenre = movieGenreInput.value;
+   let movieYear = movieYearInput.value;
+ 
+   // Perform any necessary actions with the form data (e.g., submit to a server, update UI, etc.)
+ 
+   // Close the modal after form submission
+   modal.style.display = 'none';
+ 
+   // Optionally, you can reset the form fields
+   form.reset();
+ });
+ 
