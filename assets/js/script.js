@@ -133,7 +133,7 @@ form.addEventListener('submit', function(event) {
   // Close the modal after form submission
   modal.style.display = 'none';
 
-  // Optionally, you can reset the form fields
+  // Optionally, you cannn reset the form fields
   form.reset();
 });
 
