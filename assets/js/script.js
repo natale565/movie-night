@@ -136,3 +136,4 @@ form.addEventListener('submit', function(event) {
   // Optionally, you can reset the form fields
   form.reset();
 });
+
