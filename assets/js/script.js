@@ -195,7 +195,7 @@ $(document).ready(function() {
       "Western"
     ];
 
-    $('#movieGenreModal').autocomplete({
+    $('#movieGenre').autocomplete({
       source: availableGenres
     });
 
