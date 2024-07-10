@@ -218,4 +218,3 @@ $(document).ready(function() {
 //     </div>
 //   `;
 // }
-
