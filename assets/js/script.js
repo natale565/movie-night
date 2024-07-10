@@ -178,54 +178,30 @@ function getStreaming(streamLocation, apiKey, apiUrl) {
 
 
   
-  const formEl = $('#form');
-  const genreInputEl = $('#movieGenre')
-
-  $( function() {
+$(document).ready(function() {
     const availableGenres = [
-      "ActionScript",
-      "AppleScript",
-      "Asp",
-      "BASIC",
-      "C",
-      "C++",
-      "Clojure",
-      "COBOL",
-      "ColdFusion",
-      "Erlang",
-      "Fortran",
-      "Groovy",
-      "Haskell",
-      "Java",
-      "JavaScript",
-      "Lisp",
-      "Perl",
-      "PHP",
-      "Python",
-      "Ruby",
-      "Scala",
-      "Scheme"
+      "Action",
+      "Adventure",
+      "Animation",
+      "Comedy",
+      "Crime",
+      "Drama",
+      "Fantasy",
+      "Horror",
+      "Mystery",
+      "Romance",
+      "Science Fiction",
+      "Thriller",
+      "Western"
     ];
-    $( "#movieGenre" ).autocomplete({
+
+    $('#movieGenreModal').autocomplete({
       source: availableGenres
     });
-  } );
 
-
- // Hide the modal after adding task
-  $('#formModal').modal('hide');
-
-
-  
-
-    })
-    .then(data => {
-        console.log(data);
-
-    })
-    .catch(error => {
-        console.error('Error fetching movie details:', error);
-    });
+    // Hide the modal after adding task
+//     $('#formModal').modal('hide');
+  });
 
 //function to display movie details from title/year search
 //function displayMovieDetails(movieData){
