@@ -54,12 +54,14 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log(data);
         displayTitleMovies(data); 
         saveTitleSearch(movieTitle);
+        
       })
       .catch(error => {
         console.error('Error fetching data:', error);
         alert('Failed to fetch movie data. Please try again.');
       });
-  });
+      
+      document.getElementById('movieTitleInput').value = '';  });
 
   function saveTitleSearch(movieTitle) {
     let searches = JSON.parse(localStorage.getItem('titleSearches')) || [];
