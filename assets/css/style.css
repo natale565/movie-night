@@ -2,7 +2,6 @@
 .modal {
     display: none;
     position: fixed;
-    
     left: 0;
     top: 0;
     width: 100%;
@@ -33,17 +32,6 @@
     cursor: pointer;
 }
 
-
-.form{
-    margin: 80px;
-    width: 250px;
-}
-
-.card{
-    margin: 80px;
-    width: 400px;
-}
-
 .btn {
     font-size: 1.3rem;
     text-decoration:none;
@@ -56,7 +44,46 @@
     transform: translate(-1px, -1px);
 }
 
-.container{
-    margin: 80px;
-    width: 400px;
+
+#movieResults {
+    display: flex;
+    flex-wrap: wrap;
 }
+  
+#movieResults .col {
+    margin-bottom: 20px;
+}
+
+#previous-title-searches{
+  margin-bottom: 15px;
+}
+.container-same-width {
+    width: 100%;
+}
+  
+.card-img-top {
+    object-fit: cover;
+    height: 100%;
+}
+  
+.card-body {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.card {
+    width: 100%;
+    margin-bottom: 20px;
+}
+  
+#movieResults .row {
+    margin-bottom: 20px;
+}
+  
+@media (min-width: 768px) {
+    .card {
+      width: 100%;
+    }
+}
+  
