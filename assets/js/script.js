@@ -17,6 +17,7 @@ function displayTitleMovies(movie) {
             <h5 class="card-title">${movie.Title}</h5>
             <p class="card-text">Year: ${movie.Year}</p>
             <p class="card-text">Genre: ${movie.Genre}</p>
+            <p class="card-text">🍅Rotten Tomatoes Score: ${movie.Ratings.find(rating => rating.Source === 'Rotten Tomatoes').Value}<p>
             <p class="card-text">${movie.Plot}</p>
           </div>
         </div>
@@ -135,6 +136,7 @@ function displayGenreMovies(genreName, movies) {
           <div class="col-md-8">
             <div class="card-body">
               <h5 class="card-title">${movie.title}</h5>
+              <p class="card-text">⭐️IMDb Rating: ${movie.vote_average}/10 </p>
               <p class="card-text">${movie.overview}</p>
             </div>
           </div>
@@ -251,7 +253,8 @@ function fetchMoviesByGenre(apiKey, apiUrl) {
     const genreSelect = document.getElementById('movieGenre');
     const selectedOption = genreSelect.options[genreSelect.selectedIndex];
     const genreName = selectedOption ? selectedOption.textContent : 'Unknown Genre';
-
+    
+    console.log(data);
     displayGenreMovies(genreName, data.results);
     saveGenreSearch(apiUrl);
     closeModal();
