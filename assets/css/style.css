@@ -133,3 +133,16 @@ label{
     radial-gradient(70% 80% ellipse at center bottom, #261226 0%, #100a1c 100%);
     
 }
+
+.movie-card-header{
+    color: white;
+    text-align: center;
+}
+
+.card-text {
+    color:black;
+}
+
+.card-title {
+    color: black;
+}
