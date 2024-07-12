@@ -9,6 +9,8 @@
     integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous" />
   <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+  <script src="https://kit.fontawesome.com/51214fba6d.js" crossorigin="anonymous"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Honk&family=Lilita+One&family=Playwrite+AU+TAS:wght@100..400&family=Playwrite+MX:wght@100..400&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./assets/css/jass.css" />
   <link rel="stylesheet" href="./assets/css/style.css" />
   <title>Movie Night</title>
@@ -17,31 +19,31 @@
 <body>
   <header class="p-4 mb-4 text-center border-bottom border-5">
     <h1 class="display-3">Movie Search Database</h1>
-    <p class="lead">Click the button below to find a movie!</p>
+    <p class="lead">🍿Click the button below to find a movie!🍿</p>
   </header>
 
   <div class="container">
     <div class="row">
       <div class="col-md-4">
-        <div class="card mb-4">
-          <h3 class="card-header text-uppercase">Search By Movie Title</h3>
+        <div class="box" class="card mb-4">
+          <h3 class="card-header">Search By Movie Title</h3>
           <form id="movieName" class="card-body">
             <label class="form-label" for="movieTitleInput">Movie Title:</label>
             <input id="movieTitleInput" type="text" autofocus="true" class="form-control mb-2" />
-            <button type="submit" class="search-button btn btn-primary">Search</button>
+ <button type="submit" class="search-button btn btn-primary"> Search <i class="fa-solid fa-ticket"></i></button>
           </form>
         </div>
         
         <div>
-          <h5>Previous Title Searches:</h5>
+          <h5 class="pastSearch">Previous Title Searches:</h5>
           <div id="previous-title-searches">
           </div>
         </div>
 
-        <div class="card mb-4">
-          <h3 class="card-header text-uppercase">Search By Genre</h3>
+        <div class="box" class="card mb-4">
+          <h3 class="card-header">Search By Genre</h3>
           <div class="card-body">
-            <button class="search-button btn btn-primary" data-bs-toggle="modal" data-bs-target="#formModal">Search</button>
+            <button class="search-button btn btn-primary" data-bs-toggle="modal" data-bs-target="#formModal">Search <i class="fa-solid fa-ticket"></i></button>
           </div>
         </div>
       </div>
