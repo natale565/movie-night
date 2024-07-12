@@ -32,7 +32,7 @@
     cursor: pointer;
 }
 
-.btn {
+.search-button .button{
     font-size: 1.3rem;
     text-decoration:none;
     margin: 5px 0;
@@ -79,6 +79,10 @@
   
 #movieResults .row {
     margin-bottom: 20px;
+}
+
+.full-width-button{
+    width: 100%;
 }
   
 @media (min-width: 768px) {
