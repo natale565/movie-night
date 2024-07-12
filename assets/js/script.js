@@ -32,7 +32,6 @@ function displayTitleMovies(movie, streamingOptions) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-  // Event listener for movie search form
   document.getElementById('movieName').addEventListener('submit', function(event) {
     event.preventDefault();
 
@@ -158,10 +157,6 @@ function displayGenreMovies(genreName, movies) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-  // Your existing code for genre selection and form submission
-
-  // Example usage:
-  // fetchMoviesByGenre(apiKey, apiUrl, genreName); // This function should call displayGenreMovies with the correct parameters
 });
 
 
