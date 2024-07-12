@@ -1,12 +1,12 @@
-// Search by movie title and display functions and get movie title/details/year/image/genre
-function displayTitleMovies(movie) {
+// Display movie details function
+function displayTitleMovies(movie, streamingOptions) {
   const movieResultsEl = document.getElementById('movieResults');
   const headerElement = document.createElement('h4');
   headerElement.textContent = `Showing Results For: ${movie.Title}`;
+  movieResultsEl.innerHTML = '';
   movieResultsEl.appendChild(headerElement);
   
   const movieHTML = `
-  <h4> Showing Results For: ${movie.Title} </h4>
     <div class="card mb-4">
       <div class="row g-0">
         <div class="col-md-4">
@@ -17,18 +17,21 @@ function displayTitleMovies(movie) {
             <h5 class="card-title">${movie.Title}</h5>
             <p class="card-text">Year: ${movie.Year}</p>
             <p class="card-text">Genre: ${movie.Genre}</p>
-            <p class="card-text">🍅Rotten Tomatoes Score: ${movie.Ratings.find(rating => rating.Source === 'Rotten Tomatoes').Value}<p>
+            <p class="card-text">🍅Rotten Tomatoes Score: ${movie.Ratings.find(rating => rating.Source === 'Rotten Tomatoes').Value}</p>
             <p class="card-text">${movie.Plot}</p>
+            <button class="btn btn-info btn-sm" id="streamingOptionsBtn">Streaming Options</button>
+            <div id="streaming-options"></div>
           </div>
         </div>
       </div>
     </div>
   `;
   
-  movieResultsEl.innerHTML = movieHTML;
+  movieResultsEl.innerHTML += movieHTML;
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+  // Event listener for movie search form
   document.getElementById('movieName').addEventListener('submit', function(event) {
     event.preventDefault();
 
@@ -52,7 +55,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (data.Response === 'False') {
           throw new Error(data.Error || 'Movie not found');
         }
-        console.log(data);
         displayTitleMovies(data); 
         saveTitleSearch(movieTitle);
         
@@ -62,7 +64,10 @@ document.addEventListener('DOMContentLoaded', function() {
         alert('Failed to fetch movie data. Please try again.');
       });
       
-      document.getElementById('movieTitleInput').value = '';  });
+      document.getElementById('movieTitleInput').value = '';  
+  });
+
+  displayPreviousTitleSearches();
 
   function saveTitleSearch(movieTitle) {
     let searches = JSON.parse(localStorage.getItem('titleSearches')) || [];
@@ -78,7 +83,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let searches = JSON.parse(localStorage.getItem('titleSearches')) || [];
     searches.forEach(search => {
       const searchButton = document.createElement('button');
-      searchButton.classList.add('btn', 'btn-primary', 'me-2', 'mb-2');
+      searchButton.classList.add('btn', 'btn-outline-secondary', 'mb-2', 'full-width-button');
       searchButton.textContent = search;
       searchButton.addEventListener('click', function() {
         fetchMovieDetailsAndDisplay(search);
@@ -91,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function() {
   function fetchMovieDetailsAndDisplay(movieTitle) {
     const apiKey = 'af9c33c6';
     const apiUrl = `https://www.omdbapi.com/?apikey=${apiKey}&t=${encodeURIComponent(movieTitle)}`;
-
+  
     fetch(apiUrl)
       .then(response => {
         if (!response.ok) {
@@ -110,7 +115,7 @@ document.addEventListener('DOMContentLoaded', function() {
         alert('Failed to fetch movie data. Please try again.');
       });
   }
-  displayPreviousTitleSearches();
+  
 });
 // End of movie title and display functions
 
@@ -124,8 +129,9 @@ function displayGenreMovies(genreName, movies) {
   headerElement.classList.add('mb-4');
   movieResultsElement.appendChild(headerElement);
 
+  const posterBaseUrl = 'https://image.tmdb.org/t/p/w500';
+  
   movies.forEach(movie => {
-    const posterBaseUrl = 'https://image.tmdb.org/t/p/w500';
     const posterPath = movie.poster_path ? posterBaseUrl + movie.poster_path : 'https://via.placeholder.com/500x750?text=No+Poster';
     const movieCard = `
       <div class="card mb-4">
@@ -138,6 +144,8 @@ function displayGenreMovies(genreName, movies) {
               <h5 class="card-title">${movie.title}</h5>
               <p class="card-text">⭐️IMDb Rating: ${movie.vote_average}/10 </p>
               <p class="card-text">${movie.overview}</p>
+             <button class="btn btn-info btn-sm" id="streamingOptionsBtn">Streaming Options</button>
+            <div id="streaming-options"></div>
             </div>
           </div>
         </div>
@@ -147,6 +155,13 @@ function displayGenreMovies(genreName, movies) {
     movieResultsElement.innerHTML += movieCard;
   });
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Your existing code for genre selection and form submission
+
+  // Example usage:
+  // fetchMoviesByGenre(apiKey, apiUrl, genreName); // This function should call displayGenreMovies with the correct parameters
+});
 
 
 const genreMapping = {
@@ -279,54 +294,59 @@ function closeModal() {
 }
 //End of search by genre and display functions
 
+// Get where to stream function
+// document.getElementById('movieName').addEventListener('submit', function(event) {
+//   event.preventDefault();
 
+//   const apiKey = '2155496cf9mshec9d20788864224p1f59bajsn1d032f45b0ba';
+//   const apiUrl = 'https://streaming-availability.p.rapidapi.com/shows/search/title';
+//   const movieName = document.getElementById('movieTitleInput').value;
 
-
-
-
-
-
-
-//Get where to stream function
-// document.getElementById('').addEventListener('submit', function(event) { //Update getElementById to correct form
-//     event.preventDefault();
-
-//     const apiKey = '2155496cf9mshec9d20788864224p1f59bajsn1d032f45b0ba';
-//     const apiUrl = 'https://streaming-availability.p.rapidapi.com/shows/search/title';
-//     const streamLocation = document.getElementById('').value.trim(); //Update getElementById to correct input field
-
-//     getStreaming(streamLocation, apiKey, apiUrl);
+//   getStreaming(movieName, apiKey, apiUrl);
 // });
 
-// function getStreaming(streamLocation, apiKey, apiUrl) {
-//     const url = new URL(apiUrl);
-//     url.searchParams.append('series_granularity', 'show');
-//     url.searchParams.append('show_type', 'movie');
-//     url.searchParams.append('output_language', 'en');
-//     url.searchParams.append('where_to_stream', streamLocation);
 
-//     fetch(url, {
-//         method: 'GET',
-//         headers: {
-//             'x-rapidapi-key': apiKey,
-//             'x-rapidapi-host': 'streaming-availability.p.rapidapi.com',
-//         }
-//     })
-//     .then(response => {
-//         if (!response.ok) {
-//             throw new Error('Network response was not ok');
-//         }
-//         return response.json();
-//     })
-//     .then(data => {
-//         if (data.Response === 'False') {
-//             throw new Error(data.Error || 'Movies not found');
-//         }
-//         console.log(data);
-//     })
-//     .catch(error => {
-//         console.error('Error fetching data:', error);
-//         alert('Failed to fetch movie data. Please try again.');
-//     });
-// };
+// document.getElementById('movieName').addEventListener('submit', function(event) {
+//   event.preventDefault();
 
+//   const apiKey = '2155496cf9mshec9d20788864224p1f59bajsn1d032f45b0ba';
+//   const apiUrl = 'https://streaming-availability.p.rapidapi.com/shows/search/title';
+//   const movieName = document.getElementById('movieTitleInput').value;
+
+//   getStreaming(movieName, apiKey, apiUrl);
+// });
+
+// function getStreaming(movieName, apiKey, apiUrl) {
+//   const url = new URL(apiUrl);
+//   url.searchParams.append('country', 'us');
+//   url.searchParams.append('title', movieName);
+//   url.searchParams.append('series_granularity', 'show');
+//   url.searchParams.append('show_type', 'movie');
+//   url.searchParams.append('output_language', 'en');
+
+//   fetch(url, {
+//     method: 'GET',
+//     headers: {
+//       'x-rapidapi-key': apiKey,
+//       'x-rapidapi-host': 'streaming-availability.p.rapidapi.com',
+//     }
+//   })
+//   .then(response => {
+//     if (!response.ok) {
+//       throw new Error('Network response was not ok');
+//     }
+//     return response.json();
+//   })
+//   .then(data => {
+//     if (data.Response === 'False') {
+//       throw new Error(data.Error || 'Movies not found');
+//     } else {
+//       // Process the data here, like displaying streaming platforms
+//       console.log(data);
+//     }
+//   })
+//   .catch(error => {
+//     console.error('Error fetching data:', error);
+//     alert('Failed to fetch movie data. Please try again.');
+//   });
+// }
