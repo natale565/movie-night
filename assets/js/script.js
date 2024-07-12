@@ -2,6 +2,7 @@
 function displayTitleMovies(movie, streamingOptions) {
   const movieResultsEl = document.getElementById('movieResults');
   const headerElement = document.createElement('h4');
+  headerElement.classList.add('movie-card-header');
   headerElement.textContent = `Showing Results For: ${movie.Title}`;
   movieResultsEl.innerHTML = '';
   movieResultsEl.appendChild(headerElement);
