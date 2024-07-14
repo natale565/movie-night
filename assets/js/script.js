@@ -1,4 +1,3 @@
-// Display movie details function
 function displayTitleMovies(movie, streamingOptions) {
   const movieResultsEl = document.getElementById('movieResults');
   const headerElement = document.createElement('h4');
@@ -78,7 +77,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function displayPreviousTitleSearches() {
     const previousTitleSearchEl = document.getElementById('previous-title-searches');
-    previousTitleSearchEl.innerHTML = '';
 
     let searches = JSON.parse(localStorage.getItem('titleSearches')) || [];
     searches = [...new Set(searches)];
@@ -87,14 +85,14 @@ document.addEventListener('DOMContentLoaded', function() {
       searchButton.classList.add('btn', 'btn-outline-secondary', 'mb-2', 'full-width-button');
       searchButton.textContent = search;
       searchButton.addEventListener('click', function() {
-        fetchMovieDetailsAndDisplay(search);
+        fetchTitleSearchFromSaved(search);
       });
 
       previousTitleSearchEl.appendChild(searchButton);
     });
   }
 
-  function fetchMovieDetailsAndDisplay(movieTitle) {
+  function fetchTitleSearchFromSaved(movieTitle) {
     const apiKey = 'af9c33c6';
     const apiUrl = `https://www.omdbapi.com/?apikey=${apiKey}&t=${encodeURIComponent(movieTitle)}`;
   
@@ -121,14 +119,15 @@ document.addEventListener('DOMContentLoaded', function() {
 // End of movie title and display functions
 
 // Get movie genre and display functions
-function displayGenreMovies(genreName, movies) {
+function displayGenreMovies(genreName, movies, currentPage, totalPages) {
   const movieResultsElement = document.getElementById('movieResults');
-  movieResultsElement.innerHTML = '';
+   if(currentPage === 1){movieResultsElement.innerHTML = '';
 
   const headerElement = document.createElement('h5');
   headerElement.textContent = `Showing Search Results For: ${genreName}`;
   headerElement.classList.add('mb-4');
   movieResultsElement.appendChild(headerElement);
+   }
 
   const posterBaseUrl = 'https://image.tmdb.org/t/p/w500';
   
@@ -155,7 +154,28 @@ function displayGenreMovies(genreName, movies) {
 
     movieResultsElement.innerHTML += movieCard;
   });
+
+if (currentPage < totalPages) {
+  const loadMoreButton = document.createElement('button');
+  loadMoreButton.classList.add('btn', 'btn-outline-secondary', 'mb-2', 'full-width-button');
+  loadMoreButton.textContent = 'Load More Results';
+  loadMoreButton.addEventListener('click', function() {
+    loadMoreResults(genreName, currentPage + 1);
+    movieResultsElement.removeChild(loadMoreButton);
+  });
+  movieResultsElement.appendChild(loadMoreButton);
 }
+}
+
+function loadMoreResults(genreName, nextPage) {
+    const apiKey = '2155496cf9mshec9d20788864224p1f59bajsn1d032f45b0ba';
+    const baseApiUrl = 'https://advanced-movie-search.p.rapidapi.com/discover/movie?with_genres=';
+    const genreSelect = document.getElementById('movieGenre');
+    const selectedGenreId = genreSelect.value;
+    const apiUrl = `${baseApiUrl}${selectedGenreId}&page=${nextPage}`;
+  
+    fetchMoviesByGenre(apiKey, apiUrl, genreName);
+  }
 
 document.addEventListener('DOMContentLoaded', function() {
 });
@@ -209,10 +229,13 @@ document.addEventListener('DOMContentLoaded', function() {
       const apiUrl = `${baseApiUrl}${selectedGenreId}&page=1`;
   
       fetchMoviesByGenre(apiKey, apiUrl, genreName);
+  
 
       document.getElementById('movieGenre').value = '';
     });
   });
+  displayPreviousGenreSearches()
+
   
   function fetchMoviesByGenre(apiKey, apiUrl, genreName) {
     fetch(apiUrl, {
@@ -232,118 +255,103 @@ document.addEventListener('DOMContentLoaded', function() {
       if (data.error) {
         throw new Error(data.error.message || 'Movies not found');
       }
+      const totalPages = data.total_pages;
+      const currentPage = data.page;
   
-      displayGenreMovies(genreName, data.results);
+      displayGenreMovies(genreName, data.results, currentPage, totalPages);
       saveGenreSearch(apiUrl);
       closeModal();
+      displayPreviousGenreSearches();
     })
     .catch(error => {
       console.error('Error fetching data:', error);
       alert('Failed to fetch movie data. Please try again later.');
     });
   }
+
+  function fetchMoviesByGenreFromSearches(apiKey, apiUrl, genreName) {
+    fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        'x-rapidapi-key': apiKey,
+        'x-rapidapi-host': 'advanced-movie-search.p.rapidapi.com'
+      }
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to fetch movie data. Server returned ' + response.status + ' ' + response.statusText);
+      }
+      return response.json();
+    })
+    .then(data => {
+      if (data.error) {
+        throw new Error(data.error.message || 'Movies not found');
+      }
+      const totalPages = data.total_pages;
+      const currentPage = data.page;
   
-function fetchMoviesByGenre(apiKey, apiUrl) {
-  fetch(apiUrl, {
-    method: 'GET',
-    headers: {
-      'x-rapidapi-key': apiKey,
-      'x-rapidapi-host': 'advanced-movie-search.p.rapidapi.com'
-    }
-  })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Failed to fetch movie data. Server returned ' + response.status + ' ' + response.statusText);
-    }
-    return response.json();
-  })
-  .then(data => {
-    if (data.error) {
-      throw new Error(data.error.message || 'Movies not found');
-    }
-    
-    const genreSelect = document.getElementById('movieGenre');
-    const selectedOption = genreSelect.options[genreSelect.selectedIndex];
-    const genreName = selectedOption ? selectedOption.textContent : 'Unknown Genre';
-    
-    console.log(data);
-    displayGenreMovies(genreName, data.results);
-    saveGenreSearch(apiUrl);
-    closeModal();
-  })
-  .catch(error => {
-    console.error('Error fetching data:', error);
-    alert('Failed to fetch movie data. Please try again later.');
-  });
-}
+      displayGenreMovies(genreName, data.results, currentPage, totalPages);
+      displayPreviousGenreSearches();
+    })
+    .catch(error => {
+      console.error('Error fetching data:', error);
+      alert('Failed to fetch movie data. Please try again later.');
+    });
+  }
 
+  function saveGenreSearch(genreUrl) {
+    let searches = JSON.parse(localStorage.getItem('genreSearches')) || [];
+    const existingSearch = searches.find(search => search.url === genreUrl);
+    
+    if (!existingSearch) {
+      const genreName = extractGenreNameFromUrl(genreUrl);
+      searches.push({ url: genreUrl, name: genreName });
+      localStorage.setItem('genreSearches', JSON.stringify(searches));
+    }
+  }
+  function displayPreviousGenreSearches() {
+    const previousGenreSearchEl = document.getElementById('previous-genre-searches');
+    previousGenreSearchEl.innerHTML = ''
 
-function saveGenreSearch(genreUrl) {
-  let searches = JSON.parse(localStorage.getItem('genreSearches')) || [];
-  searches.push(genreUrl);
-  localStorage.setItem('genreSearches', JSON.stringify(searches));
-}
+    let searches = JSON.parse(localStorage.getItem('genreSearches')) || [];
+    searches.forEach(search => {
+      const searchButton = document.createElement('button');
+      searchButton.classList.add('btn', 'btn-outline-secondary', 'mb-2', 'full-width-button');
+      searchButton.textContent = search.name;
+      searchButton.addEventListener('click', function() {
+        const genreId = extractGenreIdFromUrl(search.url);
+        const apiKey = '2155496cf9mshec9d20788864224p1f59bajsn1d032f45b0ba';
+        const baseApiUrl = 'https://advanced-movie-search.p.rapidapi.com/discover/movie?with_genres=';
+        const apiUrl = `${baseApiUrl}${genreId}&page=1`;
+        fetchMoviesByGenreFromSearches(apiKey, apiUrl, search.name);
+      });
+  
+      previousGenreSearchEl.appendChild(searchButton);
+    });
+  }
 
 function closeModal() {
   const modalElement = document.getElementById('formModal');
   const modal = bootstrap.Modal.getInstance(modalElement);
   modal.hide();
+} 
+function extractGenreIdFromUrl(url) {
+  const regex = /with_genres=(\d+)/;
+  const match = url.match(regex);
+  if (match && match.length > 1) {
+    return match[1];
+  } else {
+    throw new Error('Genre ID not found in URL');
+  }
 }
-//End of search by genre and display functions
 
-// Get where to stream function
-// document.getElementById('movieName').addEventListener('submit', function(event) {
-//   event.preventDefault();
+function extractGenreNameFromUrl(url) {
+  const genreId = extractGenreIdFromUrl(url);
+  for (const name in genreMapping) {
+    if (genreMapping[name] === parseInt(genreId)) {
+      return name; 
+    }
+  }
+  throw new Error('Genre name not found for ID');
+}
 
-//   const apiKey = '2155496cf9mshec9d20788864224p1f59bajsn1d032f45b0ba';
-//   const apiUrl = 'https://streaming-availability.p.rapidapi.com/shows/search/title';
-//   const movieName = document.getElementById('movieTitleInput').value;
-
-//   getStreaming(movieName, apiKey, apiUrl);
-// });
-
-
-// document.getElementById('movieName').addEventListener('submit', function(event) {
-//   event.preventDefault();
-
-//   const apiKey = '2155496cf9mshec9d20788864224p1f59bajsn1d032f45b0ba';
-//   const apiUrl = 'https://streaming-availability.p.rapidapi.com/shows/search/title';
-//   const movieName = document.getElementById('movieTitleInput').value;
-
-//   getStreaming(movieName, apiKey, apiUrl);
-// });
-
-// function getStreaming(movieName, apiKey, apiUrl) {
-//   const url = new URL(apiUrl);
-//   url.searchParams.append('country', 'us');
-//   url.searchParams.append('title', movieName);
-//   url.searchParams.append('series_granularity', 'show');
-//   url.searchParams.append('show_type', 'movie');
-//   url.searchParams.append('output_language', 'en');
-
-//   fetch(url, {
-//     method: 'GET',
-//     headers: {
-//       'x-rapidapi-key': apiKey,
-//       'x-rapidapi-host': 'streaming-availability.p.rapidapi.com',
-//     }
-//   })
-//   .then(response => {
-//     if (!response.ok) {
-//       throw new Error('Network response was not ok');
-//     }
-//     return response.json();
-//   })
-//   .then(data => {
-//     if (data.Response === 'False') {
-//       throw new Error(data.Error || 'Movies not found');
-//     } else {
-//       // Process the data here, like displaying streaming platforms
-//       console.log(data);
-//     }
-//   })
-//   .catch(error => {
-//     console.error('Error fetching data:', error);
-//     alert('Failed to fetch movie data. Please try again.');
-//   });
-// }
