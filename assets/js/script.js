@@ -81,6 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
     previousTitleSearchEl.innerHTML = '';
 
     let searches = JSON.parse(localStorage.getItem('titleSearches')) || [];
+    searches = [...new Set(searches)];
     searches.forEach(search => {
       const searchButton = document.createElement('button');
       searchButton.classList.add('btn', 'btn-outline-secondary', 'mb-2', 'full-width-button');
