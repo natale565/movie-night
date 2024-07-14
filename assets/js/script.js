@@ -77,6 +77,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function displayPreviousTitleSearches() {
     const previousTitleSearchEl = document.getElementById('previous-title-searches');
+    previousTitleSearchEl.innerHTML = '';
 
     let searches = JSON.parse(localStorage.getItem('titleSearches')) || [];
     searches = [...new Set(searches)];
@@ -121,13 +122,14 @@ document.addEventListener('DOMContentLoaded', function() {
 // Get movie genre and display functions
 function displayGenreMovies(genreName, movies, currentPage, totalPages) {
   const movieResultsElement = document.getElementById('movieResults');
-   if(currentPage === 1){movieResultsElement.innerHTML = '';
-
-  const headerElement = document.createElement('h5');
-  headerElement.textContent = `Showing Search Results For: ${genreName}`;
-  headerElement.classList.add('mb-4');
-  movieResultsElement.appendChild(headerElement);
-   }
+  
+  if (currentPage === 1) {
+    movieResultsElement.innerHTML = '';
+    const headerElement = document.createElement('h5');
+    headerElement.textContent = `Showing Search Results For: ${genreName}`;
+    headerElement.classList.add('mb-4');
+    movieResultsElement.appendChild(headerElement);
+  }
 
   const posterBaseUrl = 'https://image.tmdb.org/t/p/w500';
   
@@ -142,44 +144,69 @@ function displayGenreMovies(genreName, movies, currentPage, totalPages) {
           <div class="col-md-8">
             <div class="card-body">
               <h5 class="card-title">${movie.title}</h5>
-              <p class="card-text">⭐️IMDb Rating: ${movie.vote_average}/10 </p>
+              <p class="card-text">⭐️IMDb Rating: ${movie.vote_average}/10</p>
               <p class="card-text">${movie.overview}</p>
-             <button class="btn btn-info btn-sm" id="streamingOptionsBtn">Streaming Options</button>
-            <div id="streaming-options"></div>
+              <button class="btn btn-info btn-sm" id="streamingOptionsBtn">Streaming Options</button>
+              <div id="streaming-options"></div>
             </div>
           </div>
         </div>
       </div>
     `;
-
     movieResultsElement.innerHTML += movieCard;
   });
 
-if (currentPage < totalPages) {
-  const loadMoreButton = document.createElement('button');
-  loadMoreButton.classList.add('btn', 'btn-outline-secondary', 'mb-2', 'full-width-button');
-  loadMoreButton.textContent = 'Load More Results';
-  loadMoreButton.addEventListener('click', function() {
-    loadMoreResults(genreName, currentPage + 1);
-    movieResultsElement.removeChild(loadMoreButton);
-  });
-  movieResultsElement.appendChild(loadMoreButton);
-}
+  if (currentPage < totalPages) {
+    const loadMoreButton = document.createElement('button');
+    loadMoreButton.classList.add('btn', 'btn-outline-secondary', 'mb-2', 'full-width-button');
+    loadMoreButton.textContent = 'Load More Results';
+    loadMoreButton.addEventListener('click', function() {
+      loadMoreResults(genreName, currentPage + 1);
+      movieResultsElement.removeChild(loadMoreButton);
+    });
+    movieResultsElement.appendChild(loadMoreButton);
+  }
 }
 
 function loadMoreResults(genreName, nextPage) {
-    const apiKey = '2155496cf9mshec9d20788864224p1f59bajsn1d032f45b0ba';
-    const baseApiUrl = 'https://advanced-movie-search.p.rapidapi.com/discover/movie?with_genres=';
-    const genreSelect = document.getElementById('movieGenre');
-    const selectedGenreId = genreSelect.value;
-    const apiUrl = `${baseApiUrl}${selectedGenreId}&page=${nextPage}`;
-  
-    fetchMoviesByGenre(apiKey, apiUrl, genreName);
-  }
+  const apiKey = '2155496cf9mshec9d20788864224p1f59bajsn1d032f45b0ba';
+  const baseApiUrl = 'https://advanced-movie-search.p.rapidapi.com/discover/movie?with_genres=';
+  const genreSelect = document.getElementById('movieGenre');
+  const selectedGenreId = genreSelect.value;
+  const apiUrl = `${baseApiUrl}${selectedGenreId}&page=${nextPage}`;
 
-document.addEventListener('DOMContentLoaded', function() {
-});
+  fetchNextGenrePage(apiKey, apiUrl, genreName, nextPage);
+}
 
+function fetchNextGenrePage(apiKey, apiUrl, genreName, nextPage) {
+  fetch(apiUrl, {
+    method: 'GET',
+    headers: {
+      'x-rapidapi-key': apiKey,
+      'x-rapidapi-host': 'advanced-movie-search.p.rapidapi.com'
+    }
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Failed to fetch movie data. Server returned ' + response.status + ' ' + response.statusText);
+    }
+    return response.json();
+  })
+  .then(data => {
+    if (data.error) {
+      throw new Error(data.error.message || 'Movies not found');
+    }
+    const totalPages = data.total_pages;
+    const currentPage = data.page;
+
+    displayGenreMovies(genreName, data.results, nextPage, totalPages);
+    displayPreviousGenreSearches();
+  })
+  .catch(error => {
+    console.error('Error fetching data:', error);
+    alert('Failed to fetch movie data. Please try again later.');
+  });
+}
 
 const genreMapping = {
   "Action": 28,
@@ -341,6 +368,7 @@ function extractGenreIdFromUrl(url) {
   if (match && match.length > 1) {
     return match[1];
   } else {
+    console.error('URL:', url);
     throw new Error('Genre ID not found in URL');
   }
 }
@@ -349,9 +377,10 @@ function extractGenreNameFromUrl(url) {
   const genreId = extractGenreIdFromUrl(url);
   for (const name in genreMapping) {
     if (genreMapping[name] === parseInt(genreId)) {
-      return name; 
+      return name;
     }
   }
+  console.error('URL:', url);
   throw new Error('Genre name not found for ID');
 }
 
