@@ -131,7 +131,6 @@ label{
     background-color: #100a1c;
     background-image: radial-gradient(50% 50% ellipse at right, #201e40 0%, rgba(0,0,0,0)100%),
     radial-gradient(70% 80% ellipse at center bottom, #261226 0%, #100a1c 100%);
-    
 }
 
 .movie-card-header{
@@ -146,3 +145,4 @@ label{
 .card-title {
     color: black;
 }
+
