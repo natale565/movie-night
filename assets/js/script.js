@@ -19,7 +19,7 @@ function displayTitleMovies(movie) {
             <p class="card-text">Genre: ${movie.Genre}</p>
             <p class="card-text">🍅Rotten Tomatoes Score: ${movie.Ratings.find(rating => rating.Source === 'Rotten Tomatoes').Value}</p>
             <p class="card-text">${movie.Plot}</p>
-            <button class="btn btn-info btn-sm streaming-options-btn">Streaming Options</button>
+            <button class="btn btn-info btn-sm streaming-options-btn">Streaming</button>
             <div id="streaming-options"></div>
           </div>
         </div>
@@ -148,16 +148,20 @@ function displayGenreMovies(genreName, movies, currentPage, totalPages) {
               <h5 class="card-title">${movie.title}</h5>
               <p class="card-text">⭐️IMDb Rating: ${movie.vote_average}/10</p>
               <p class="card-text">${movie.overview}</p>
-              <button class="btn btn-info btn-sm streaming-options-btn">Streaming Options</button>
-              <div id="streaming-options"></div>
+              <button class="btn btn-info btn-sm streaming-options-btn">Streaming</button>
+              <div id="streaming-options"></div> 
             </div>
           </div>
         </div>
       </div>
     `;
     movieResultsElement.innerHTML += movieCard;
-    const streamingBtn = movieResultsElement.querySelector('.streaming-options-btn:last-of-type');
-    streamingBtn.addEventListener('click', function() {
+  });
+
+  const streamingBtns = movieResultsElement.querySelectorAll('.streaming-options-btn');
+  streamingBtns.forEach((btn, index) => {
+    btn.addEventListener('click', function() {
+      const movie = movies[index];
       getStreaming(movie.title);
     });
   });
@@ -172,8 +176,8 @@ function displayGenreMovies(genreName, movies, currentPage, totalPages) {
     });
     movieResultsElement.appendChild(loadMoreButton);
   }
-
 }
+
 
 function loadMoreResults(genreName, nextPage) {
   const apiKey = '2155496cf9mshec9d20788864224p1f59bajsn1d032f45b0ba';
@@ -417,6 +421,7 @@ function getStreaming(movieName) {
   })
   .then(data => {
     const servicesContainer = document.getElementById('streaming-options');
+
     servicesContainer.innerHTML = '';
 
     if (data.Response === 'False') {
@@ -427,30 +432,16 @@ function getStreaming(movieName) {
       if (show.streamingOptions && show.streamingOptions.us) {
         const streamingOptions = show.streamingOptions.us;
 
-        const displayedServices = new Set();
-        let displayedCount = 0;
+        const streamingOption = streamingOptions[0];
 
-        for (let i = 0; i < streamingOptions.length; i++) {
-          const streamingOption = streamingOptions[i];
+        const button = document.createElement('button');
+        button.classList.add('btn', 'btn-outline-secondary', 'btn-sm', 'streaming-btn');
+        button.textContent = streamingOption.service.name;
+        button.addEventListener('click', function() {
+          window.open(streamingOption.link, '_blank');
+        });
 
-          if (!displayedServices.has(streamingOption.service.name)) {
-            const button = document.createElement('button');
-            button.classList.add('btn', 'btn-outline-secondary', 'btn-sm', 'streaming-btn');
-            button.textContent = streamingOption.service.name;
-            button.addEventListener('click', function() {
-              window.open(streamingOption.link, '_blank');
-            });
-
-            servicesContainer.appendChild(button);
-
-            displayedServices.add(streamingOption.service.name);
-            displayedCount++;
-
-            if (displayedCount === 2) {
-              break;
-            }
-          }
-        }
+        servicesContainer.appendChild(button);
       } else {
         servicesContainer.textContent = 'No streaming options found';
       }
