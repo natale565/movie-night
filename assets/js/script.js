@@ -149,21 +149,20 @@ function displayGenreMovies(genreName, movies, currentPage, totalPages) {
               <p class="card-text">⭐️IMDb Rating: ${movie.vote_average}/10</p>
               <p class="card-text">${movie.overview}</p>
               <button class="btn btn-info btn-sm streaming-options-btn">Streaming</button>
-              <div id="streaming-options"></div> 
+              <div class="streaming-options"></div> 
             </div>
           </div>
         </div>
       </div>
     `;
     movieResultsElement.innerHTML += movieCard;
-  });
-
-  const streamingBtns = movieResultsElement.querySelectorAll('.streaming-options-btn');
+    const streamingBtns = movieResultsElement.querySelectorAll('.streaming-options-btn');
   streamingBtns.forEach((btn, index) => {
     btn.addEventListener('click', function() {
       const movie = movies[index];
       getStreaming(movie.title);
-    });
+  });
+ });
   });
 
   if (currentPage < totalPages) {
@@ -420,7 +419,8 @@ function getStreaming(movieName) {
     return response.json();
   })
   .then(data => {
-    const servicesContainer = document.getElementById('streaming-options');
+    const servicesContainer = document.querySelectorAll('.streaming-options');
+
 
     servicesContainer.innerHTML = '';
 
