@@ -1,4 +1,4 @@
-function displayTitleMovies(movie, streamingOptions) {
+function displayTitleMovies(movie) {
   const movieResultsEl = document.getElementById('movieResults');
   const headerElement = document.createElement('h4');
   headerElement.classList.add('movie-card-header');
@@ -19,7 +19,7 @@ function displayTitleMovies(movie, streamingOptions) {
             <p class="card-text">Genre: ${movie.Genre}</p>
             <p class="card-text">🍅Rotten Tomatoes Score: ${movie.Ratings.find(rating => rating.Source === 'Rotten Tomatoes').Value}</p>
             <p class="card-text">${movie.Plot}</p>
-            <button class="btn btn-info btn-sm" id="streamingOptionsBtn">Streaming Options</button>
+            <button class="btn btn-info btn-sm streaming-options-btn">Streaming Options</button>
             <div id="streaming-options"></div>
           </div>
         </div>
@@ -28,6 +28,10 @@ function displayTitleMovies(movie, streamingOptions) {
   `;
   
   movieResultsEl.innerHTML += movieHTML;
+  const streamingBtn = movieResultsEl.querySelector('.streaming-options-btn');
+  streamingBtn.addEventListener('click', function() {
+    getStreaming(movie.Title);
+  });
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -117,9 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
 });
-// End of movie title and display functions
 
-// Get movie genre and display functions
 function displayGenreMovies(genreName, movies, currentPage, totalPages) {
   const movieResultsElement = document.getElementById('movieResults');
   
@@ -146,7 +148,7 @@ function displayGenreMovies(genreName, movies, currentPage, totalPages) {
               <h5 class="card-title">${movie.title}</h5>
               <p class="card-text">⭐️IMDb Rating: ${movie.vote_average}/10</p>
               <p class="card-text">${movie.overview}</p>
-              <button class="btn btn-info btn-sm" id="streamingOptionsBtn">Streaming Options</button>
+              <button class="btn btn-info btn-sm streaming-options-btn">Streaming Options</button>
               <div id="streaming-options"></div>
             </div>
           </div>
@@ -154,6 +156,10 @@ function displayGenreMovies(genreName, movies, currentPage, totalPages) {
       </div>
     `;
     movieResultsElement.innerHTML += movieCard;
+    const streamingBtn = movieResultsElement.querySelector('.streaming-options-btn:last-of-type');
+    streamingBtn.addEventListener('click', function() {
+      getStreaming(movie.title);
+    });
   });
 
   if (currentPage < totalPages) {
@@ -166,6 +172,7 @@ function displayGenreMovies(genreName, movies, currentPage, totalPages) {
     });
     movieResultsElement.appendChild(loadMoreButton);
   }
+
 }
 
 function loadMoreResults(genreName, nextPage) {
@@ -384,3 +391,73 @@ function extractGenreNameFromUrl(url) {
   throw new Error('Genre name not found for ID');
 }
 
+function getStreaming(movieName) {
+  const apiKey = '2155496cf9mshec9d20788864224p1f59bajsn1d032f45b0ba';
+  const apiUrl = 'https://streaming-availability.p.rapidapi.com/shows/search/title';
+
+  const url = new URL(apiUrl);
+  url.searchParams.append('country', 'us');
+  url.searchParams.append('title', movieName);
+  url.searchParams.append('series_granularity', 'show');
+  url.searchParams.append('show_type', 'movie');
+  url.searchParams.append('output_language', 'en');
+
+  fetch(url, {
+    method: 'GET',
+    headers: {
+      'x-rapidapi-key': apiKey,
+      'x-rapidapi-host': 'streaming-availability.p.rapidapi.com',
+    }
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.json();
+  })
+  .then(data => {
+    const servicesContainer = document.getElementById('streaming-options');
+    servicesContainer.innerHTML = '';
+
+    if (data.Response === 'False') {
+      servicesContainer.textContent = 'No streaming options found';
+    } else {
+      const show = data[0];
+
+      if (show.streamingOptions && show.streamingOptions.us) {
+        const streamingOptions = show.streamingOptions.us;
+
+        const displayedServices = new Set();
+        let displayedCount = 0;
+
+        for (let i = 0; i < streamingOptions.length; i++) {
+          const streamingOption = streamingOptions[i];
+
+          if (!displayedServices.has(streamingOption.service.name)) {
+            const button = document.createElement('button');
+            button.classList.add('btn', 'btn-outline-secondary', 'btn-sm', 'streaming-btn');
+            button.textContent = streamingOption.service.name;
+            button.addEventListener('click', function() {
+              window.open(streamingOption.link, '_blank');
+            });
+
+            servicesContainer.appendChild(button);
+
+            displayedServices.add(streamingOption.service.name);
+            displayedCount++;
+
+            if (displayedCount === 2) {
+              break;
+            }
+          }
+        }
+      } else {
+        servicesContainer.textContent = 'No streaming options found';
+      }
+    }
+  })
+  .catch(error => {
+    console.error('Error fetching data:', error);
+    alert('Failed to fetch movie data. Please try again.');
+  });
+}

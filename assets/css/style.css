@@ -148,3 +148,8 @@ label{
     color: black;
 }
 
+.streaming-btn {
+    width: 100%;
+    display: block;
+    margin-top: 5px;
+  }
