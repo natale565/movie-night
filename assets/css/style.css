@@ -139,12 +139,12 @@ label{
     margin-bottom: 20px;
 }
 
-#previous-title-searches{
-  margin-bottom: 15px;
-}
-  
 #movieResults .row {
     margin-bottom: 20px;
+}
+
+#previous-title-searches{
+  margin-bottom: 15px;
 }
   
 @media (min-width: 768px) {
