@@ -112,6 +112,8 @@ body{
     background: #100a1c;
     background-image: radial-gradient(50% 50% ellipse at center , #201e40 0%, rgba(0,0,0,0)100%),
     radial-gradient(60% 0% ellipse at center bottom, #261226 0%, #100a1c 100%);
+    padding:0;
+    margin:0;
     
 }
 
@@ -146,3 +148,8 @@ label{
     color: black;
 }
 
+.streaming-btn {
+    width: 100%;
+    display: block;
+    margin-top: 5px;
+  }
