@@ -1,4 +1,36 @@
 
+h1{
+    font-family: 'honk';
+    
+}
+  
+p, h5, h3 {
+    font-family: 'rubik';
+    text-align: center;
+    color: white;
+}
+
+label{
+    font-family: 'rubik';
+}
+
+body{
+    background: #100a1c;
+    background-image: radial-gradient(50% 50% ellipse at center , #201e40 0%, rgba(0,0,0,0)100%),
+    radial-gradient(60% 0% ellipse at center bottom, #261226 0%, #100a1c 100%);
+    padding:0;
+    margin:0;
+    
+}
+
+p {
+    color: white;
+}
+
+label{
+    color: white;
+}
+
 .modal {
     display: none;
     position: fixed;
@@ -45,20 +77,6 @@
     box-shadow: 3px 3px;
     transform: translate(-1px, -1px);
 }
-
-
-#movieResults {
-    display: flex;
-    flex-wrap: wrap;
-}
-  
-#movieResults .col {
-    margin-bottom: 20px;
-}
-
-#previous-title-searches{
-  margin-bottom: 15px;
-}
 .container-same-width {
     width: 100%;
 }
@@ -78,51 +96,9 @@
     width: 100%;
     margin-bottom: 20px;
 }
-  
-#movieResults .row {
-    margin-bottom: 20px;
-}
 
 .full-width-button{
     width: 100%;
-}
-  
-@media (min-width: 768px) {
-    .card {
-      width: 100%;
-    }
-}
-
-h1{
-    font-family: 'honk';
-    
-}
-  
-p, h5, h3 {
-    font-family: 'rubik';
-    text-align: center;
-    color: white;
-}
-
-label{
-    font-family: 'rubik';
-}
-
-body{
-    background: #100a1c;
-    background-image: radial-gradient(50% 50% ellipse at center , #201e40 0%, rgba(0,0,0,0)100%),
-    radial-gradient(60% 0% ellipse at center bottom, #261226 0%, #100a1c 100%);
-    padding:0;
-    margin:0;
-    
-}
-
-p {
-    color: white;
-}
-
-label{
-    color: white;
 }
 
 .pastSearch{
@@ -153,3 +129,26 @@ label{
     display: block;
     margin-top: 5px;
   }
+
+#movieResults {
+    display: flex;
+    flex-wrap: wrap;
+}
+  
+#movieResults .col {
+    margin-bottom: 20px;
+}
+
+#previous-title-searches{
+  margin-bottom: 15px;
+}
+  
+#movieResults .row {
+    margin-bottom: 20px;
+}
+  
+@media (min-width: 768px) {
+    .card {
+      width: 100%;
+    }
+}
