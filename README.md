@@ -45,3 +45,5 @@
 ![results_title](assets/Images/TitleSearch.png)
 
 ![results_genre](assets/Images/GenreSearch.png)
+
+![streaming results](assets/Images/streaming.png)
