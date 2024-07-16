@@ -1,12 +1,12 @@
-# Project one: Movie Night
+# Group Project One: Movie Night
 
 ## Description
 
 - Movie search directory to find movies by name or genre along with a description and where to stream.
 - When a user opens the page, they will have the option to search by movie title or genre.
-- When user searches by movie title, they will be presented with the movie poster description of movie and a button to see where to stream the movie.
+- When user searches by movie title, they will be presented with the movie poster, description, rotten tomatoes score, year the movie was released, and a button to see where to stream the movie.
 - When a user clicks the search by genre button, they will be presented with a modal to pick which genre they would like to search by.
-- Once a genre is selected, a list of movies with the movie poster description of movie and a button to see where to stream the movie.
+- Once a genre is selected, a list of movies with the movie poster, description, rotten tomatoes score, year the movie was released, and a button to see where to stream the movie.
 - All past searches are saved to localStorage for user to go back to and are saved if page is closed.
 
 ### Tasks completed
@@ -19,9 +19,7 @@
 
 # Live webpage
 
-To run this webpage, navigate to:
-
-# Screenshots of web page
+[Click here to view page!](https://natale565.github.io/movie-night/)
 
 ## Built with
 
@@ -33,8 +31,10 @@ To run this webpage, navigate to:
 
 # Screenshots of web page
 
-![homepage](/third-party-API-task-board/assets/Images/Screenshot%202024-07-01%20at%206.23.06 PM.png)
+![homepage](assets/Images/homepage.png)
 
-![modal](/third-party-API-task-board/assets/Images/Screenshot%202024-07-01%20at%206.23.13 PM.png)
+![modal](assets/Images/modalBox.png)
 
-![results_page](/third-party-API-task-board/assets/Images/Screenshot%202024-07-01%20at%206.24.08 PM.png)
+![results_title](assets/Images/TitleSearch.png)
+
+![results_genre](assets/Images/GenreSearch.png)
