@@ -20,7 +20,7 @@ function displayTitleMovies(movie) {
             <p class="card-text">🍅Rotten Tomatoes Score: ${movie.Ratings.find(rating => rating.Source === 'Rotten Tomatoes').Value}</p>
             <p class="card-text">${movie.Plot}</p>
             <button class="btn btn-info btn-sm streaming-options-btn">Streaming</button>
-            <div id="streaming-options"></div>
+            <div class="streaming-options"></div>
           </div>
         </div>
       </div>
@@ -419,36 +419,33 @@ function getStreaming(movieName) {
     return response.json();
   })
   .then(data => {
-    const servicesContainer = document.querySelectorAll('.streaming-options');
-
-
-    servicesContainer.innerHTML = '';
-
-    if (data.Response === 'False') {
-      servicesContainer.textContent = 'No streaming options found';
-    } else {
-      const show = data[0];
-
-      if (show.streamingOptions && show.streamingOptions.us) {
-        const streamingOptions = show.streamingOptions.us;
-
-        const streamingOption = streamingOptions[0];
-
-        const button = document.createElement('button');
-        button.classList.add('btn', 'btn-outline-secondary', 'btn-sm', 'streaming-btn');
-        button.textContent = streamingOption.service.name;
-        button.addEventListener('click', function() {
-          window.open(streamingOption.link, '_blank');
-        });
-
-        servicesContainer.appendChild(button);
-      } else {
+    const servicesContainers = document.querySelectorAll('.streaming-options');
+    
+    servicesContainers.forEach(servicesContainer => {
+      servicesContainer.innerHTML = '';
+  
+      if (data.Response === 'False') {
         servicesContainer.textContent = 'No streaming options found';
+      } else {
+        const show = data[0];
+  
+        if (show.streamingOptions && show.streamingOptions.us) {
+          const streamingOptions = show.streamingOptions.us;
+  
+          const streamingOption = streamingOptions[0];
+  
+          const button = document.createElement('button');
+          button.classList.add('btn', 'btn-outline-secondary', 'btn-sm', 'streaming-btn');
+          button.textContent = streamingOption.service.name;
+          button.addEventListener('click', function() {
+            window.open(streamingOption.link, '_blank');
+          });
+  
+          servicesContainer.appendChild(button);
+        } else {
+          servicesContainer.textContent = 'No streaming options found';
+        }
       }
-    }
+    });
   })
-  .catch(error => {
-    console.error('Error fetching data:', error);
-    alert('Failed to fetch movie data. Please try again.');
-  });
-}
+}  
