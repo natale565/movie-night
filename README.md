@@ -29,6 +29,13 @@
 - Bootstrap
 - Server-side APIs
 
+# API's used
+
+- [OMDb API](https://www.omdbapi.com/)
+- [Rapid API Advanced Movie Search](https://rapidapi.com/search?term%3Dadvanced%2520movie%2520search%26sortBy%3DByRelevance)
+- [Rapid API Streaming Availability](https://rapidapi.com/movie-of-the-night-movie-of-the-night-default/api/streaming-availability/playground/apiendpoint_14b2f4b9-8801-499a-bcb7-698e550f9253)
+
+
 # Screenshots of web page
 
 ![homepage](assets/Images/homepage.png)
