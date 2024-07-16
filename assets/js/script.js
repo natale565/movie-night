@@ -30,7 +30,7 @@ function displayTitleMovies(movie) {
   movieResultsEl.innerHTML += movieHTML;
   const streamingBtn = movieResultsEl.querySelector('.streaming-options-btn');
   streamingBtn.addEventListener('click', function() {
-    getStreaming(movie.Title);
+    getStreamingForTitle(movie.Title);
   });
 }
 
@@ -135,7 +135,7 @@ function displayGenreMovies(genreName, movies, currentPage, totalPages) {
 
   const posterBaseUrl = 'https://image.tmdb.org/t/p/w500';
   
-  movies.forEach(movie => {
+  movies.forEach((movie, index) => {
     const posterPath = movie.poster_path ? posterBaseUrl + movie.poster_path : 'https://via.placeholder.com/500x750?text=No+Poster';
     const movieCard = `
       <div class="card mb-4">
@@ -148,21 +148,23 @@ function displayGenreMovies(genreName, movies, currentPage, totalPages) {
               <h5 class="card-title">${movie.title}</h5>
               <p class="card-text">⭐️IMDb Rating: ${movie.vote_average}/10</p>
               <p class="card-text">${movie.overview}</p>
-              <button class="btn btn-info btn-sm streaming-options-btn">Streaming</button>
-              <div class="streaming-options"></div> 
+              <button class="btn btn-info btn-sm streaming-options-btn" data-index="${index}">Streaming</button>
+              <div class="streaming-options" data-movie="${movie.title}"></div> 
             </div>
           </div>
         </div>
       </div>
     `;
     movieResultsElement.innerHTML += movieCard;
-    const streamingBtns = movieResultsElement.querySelectorAll('.streaming-options-btn');
-  streamingBtns.forEach((btn, index) => {
-    btn.addEventListener('click', function() {
-      const movie = movies[index];
-      getStreaming(movie.title);
   });
- });
+
+  const streamingBtns = movieResultsElement.querySelectorAll('.streaming-options-btn');
+  streamingBtns.forEach(btn => {
+    btn.addEventListener('click', function() {
+      const index = btn.getAttribute('data-index');
+      const movie = movies[index];
+      getStreamingForGenre(movie.title);
+    });
   });
 
   if (currentPage < totalPages) {
@@ -176,6 +178,7 @@ function displayGenreMovies(genreName, movies, currentPage, totalPages) {
     movieResultsElement.appendChild(loadMoreButton);
   }
 }
+
 
 
 function loadMoreResults(genreName, nextPage) {
@@ -394,7 +397,7 @@ function extractGenreNameFromUrl(url) {
   throw new Error('Genre name not found for ID');
 }
 
-function getStreaming(movieName) {
+function getStreamingForGenre(movieName) {
   const apiKey = '2155496cf9mshec9d20788864224p1f59bajsn1d032f45b0ba';
   const apiUrl = 'https://streaming-availability.p.rapidapi.com/shows/search/title';
 
@@ -419,33 +422,97 @@ function getStreaming(movieName) {
     return response.json();
   })
   .then(data => {
-    const servicesContainers = document.querySelectorAll('.streaming-options');
+    const streamingContainers = document.querySelectorAll(`.streaming-options[data-movie="${movieName}"]`);
     
-    servicesContainers.forEach(servicesContainer => {
-      servicesContainer.innerHTML = '';
-  
+    streamingContainers.forEach(container => {
+      container.innerHTML = '';
+
       if (data.Response === 'False') {
-        servicesContainer.textContent = 'No streaming options found';
+        container.textContent = 'No streaming options found';
       } else {
         const show = data[0];
-  
+
         if (show.streamingOptions && show.streamingOptions.us) {
           const streamingOptions = show.streamingOptions.us;
-  
+
           const streamingOption = streamingOptions[0];
-  
+
           const button = document.createElement('button');
           button.classList.add('btn', 'btn-outline-secondary', 'btn-sm', 'streaming-btn');
           button.textContent = streamingOption.service.name;
           button.addEventListener('click', function() {
             window.open(streamingOption.link, '_blank');
           });
-  
-          servicesContainer.appendChild(button);
+
+          container.appendChild(button);
         } else {
-          servicesContainer.textContent = 'No streaming options found';
+          container.textContent = 'No streaming options found';
         }
       }
     });
   })
-}  
+  .catch(error => {
+    console.error('Error fetching streaming data:', error);
+    alert('Failed to fetch streaming options. Please try again later.');
+  });
+}
+
+function getStreamingForTitle(movieName) {
+  const apiKey = '2155496cf9mshec9d20788864224p1f59bajsn1d032f45b0ba';
+  const apiUrl = 'https://streaming-availability.p.rapidapi.com/shows/search/title';
+
+  const url = new URL(apiUrl);
+  url.searchParams.append('country', 'us');
+  url.searchParams.append('title', movieName);
+  url.searchParams.append('series_granularity', 'show');
+  url.searchParams.append('show_type', 'movie');
+  url.searchParams.append('output_language', 'en');
+
+  fetch(url, {
+    method: 'GET',
+    headers: {
+      'x-rapidapi-key': apiKey,
+      'x-rapidapi-host': 'streaming-availability.p.rapidapi.com',
+    }
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.json();
+  })
+  .then(data => {
+    const streamingContainers = document.querySelectorAll('.streaming-options');
+    
+    streamingContainers.forEach(container => {
+      container.innerHTML = '';
+
+      if (data.Response === 'False') {
+        container.textContent = 'No streaming options found';
+      } else {
+        const show = data[0];
+
+        if (show.streamingOptions && show.streamingOptions.us) {
+          const streamingOptions = show.streamingOptions.us;
+
+          const streamingOption = streamingOptions[0];
+
+          const button = document.createElement('button');
+          button.classList.add('btn', 'btn-outline-secondary', 'btn-sm', 'streaming-btn');
+          button.textContent = streamingOption.service.name;
+          button.addEventListener('click', function() {
+            window.open(streamingOption.link, '_blank');
+          });
+
+          container.appendChild(button);
+        } else {
+          container.textContent = 'No streaming options found';
+        }
+      }
+    });
+  })
+  .catch(error => {
+    console.error('Error fetching streaming data:', error);
+    alert('Failed to fetch streaming options. Please try again later.');
+  });
+}
