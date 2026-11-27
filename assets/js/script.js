@@ -3,9 +3,12 @@
 const OMDB_API_KEY = import.meta.env.VITE_OMDB_API_KEY;
 const RAPIDAPI_KEY = import.meta.env.VITE_RAPIDAPI_KEY;
 const RAPIDAPI_HOST = 'advanced-movie-search.p.rapidapi.com';
+const STREAMING_API_HOST = 'streaming-availability.p.rapidapi.com';
 const POSTER_BASE_URL = 'https://image.tmdb.org/t/p/w500';
 const STORAGE_KEY = 'titleSearches';
+const GENRE_STORAGE_KEY = 'genreSearches';
 const MAX_RECENT_SEARCHES = 8;
+let searchVersion = 0;
 
 const genreMapping = {
   Action: 28,
@@ -86,6 +89,7 @@ function showEmptyState() {
 
 // ===== Search by title (OMDb) =====
 async function fetchMovieByTitle(title, { save = true } = {}) {
+  const requestVersion = ++searchVersion;
   clearStatus();
   showLoading(`Searching for "${title}"...`);
 
@@ -102,9 +106,11 @@ async function fetchMovieByTitle(title, { save = true } = {}) {
       );
     }
 
+    if (requestVersion !== searchVersion) return;
     renderTitleResult(data);
     if (save) saveTitleSearch(data.Title);
   } catch (error) {
+    if (requestVersion !== searchVersion) return;
     console.error('Error fetching movie:', error);
     showEmptyState();
     showStatus(error.message || 'Something went wrong. Please try again.');
@@ -153,6 +159,12 @@ function renderTitleResult(movie) {
           <dl class="credits">
             ${credits.map(([label, value]) => `<dt>${label}</dt><dd>${escapeHTML(value)}</dd>`).join('')}
           </dl>` : ''}
+        <div class="streaming-options mt-3">
+          <button type="button" class="btn btn-ghost btn-sm" data-streaming-title="${escapeHTML(movie.Title)}">
+            Where to stream
+          </button>
+          <div class="streaming-results mt-2"></div>
+        </div>
       </div>
     </article>`;
 }
@@ -176,7 +188,10 @@ function saveTitleSearch(title) {
 function renderRecentSearches() {
   const listEl = $('previous-title-searches');
   const searches = getRecentSearches();
-  $('clearSearches').classList.toggle('d-none', searches.length === 0);
+  $('clearSearches').classList.toggle(
+    'd-none',
+    searches.length === 0 && getRecentGenreSearches().length === 0
+  );
 
   if (!searches.length) {
     listEl.innerHTML = '<p class="recent-empty">Your searches will show up here.</p>';
@@ -195,13 +210,65 @@ function renderRecentSearches() {
   });
 }
 
+function getRecentGenreSearches() {
+  try {
+    const searches = JSON.parse(localStorage.getItem(GENRE_STORAGE_KEY)) || [];
+    if (!Array.isArray(searches)) return [];
+
+    return searches.flatMap((search) => {
+      if (!search || typeof search !== 'object') return [];
+      const id = search.id ?? search.url?.match(/with_genres=(\d+)/)?.[1];
+      const name = search.name || Object.keys(genreMapping).find(
+        (genre) => genreMapping[genre] === Number(id)
+      );
+      return id && name ? [{ id: String(id), name: String(name) }] : [];
+    });
+  } catch {
+    return [];
+  }
+}
+
+function saveGenreSearch(genreId, genreName) {
+  const searches = getRecentGenreSearches().filter((search) => search.id !== String(genreId));
+  searches.unshift({ id: genreId, name: genreName });
+  localStorage.setItem(GENRE_STORAGE_KEY, JSON.stringify(searches.slice(0, MAX_RECENT_SEARCHES)));
+  renderGenreSearches();
+}
+
+function renderGenreSearches() {
+  const listEl = $('previous-genre-searches');
+  const searches = getRecentGenreSearches();
+  $('clearSearches').classList.toggle(
+    'd-none',
+    searches.length === 0 && getRecentSearches().length === 0
+  );
+  listEl.innerHTML = '';
+
+  searches.forEach(({ id, name }) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'recent-item';
+    button.textContent = name;
+    button.title = name;
+    button.addEventListener('click', () => fetchMoviesByGenre(id, name, { save: false }));
+    listEl.appendChild(button);
+  });
+}
+
 // ===== Browse by genre (RapidAPI Advanced Movie Search) =====
-async function fetchMoviesByGenre(genreId, genreName) {
+async function fetchMoviesByGenre(genreId, genreName, { save = true, page = 1 } = {}) {
+  const requestVersion = page === 1 ? ++searchVersion : searchVersion;
   clearStatus();
-  showLoading(`Loading ${genreName} movies...`);
+  const loadMoreButton = $('loadMoreMovies');
+  if (page === 1) {
+    showLoading(`Loading ${genreName} movies...`);
+  } else if (loadMoreButton) {
+    loadMoreButton.disabled = true;
+    loadMoreButton.textContent = 'Loading...';
+  }
 
   try {
-    const url = `https://${RAPIDAPI_HOST}/discover/movie?with_genres=${genreId}&page=1`;
+    const url = `https://${RAPIDAPI_HOST}/discover/movie?with_genres=${genreId}&page=${page}`;
     const response = await fetch(url, {
       method: 'GET',
       headers: {
@@ -213,17 +280,24 @@ async function fetchMoviesByGenre(genreId, genreName) {
 
     const data = await response.json();
     if (data.error) throw new Error(data.error.message || 'No movies found');
+    if (requestVersion !== searchVersion) return;
 
-    renderGenreResults(genreName, data.results || []);
+    if (save && page === 1) saveGenreSearch(genreId, genreName);
+    renderGenreResults(genreId, genreName, data.results || [], data.page || page, data.total_pages || page);
   } catch (error) {
+    if (requestVersion !== searchVersion) return;
     console.error('Error fetching genre:', error);
-    showEmptyState();
+    if (page === 1) showEmptyState();
+    else if (loadMoreButton) {
+      loadMoreButton.disabled = false;
+      loadMoreButton.textContent = 'Load more movies';
+    }
     showStatus('We couldn’t load that genre right now. Please try again in a moment.');
   }
 }
 
-function renderGenreResults(genreName, movies) {
-  if (!movies.length) {
+function renderGenreResults(genreId, genreName, movies, currentPage, totalPages) {
+  if (!movies.length && currentPage === 1) {
     showEmptyState();
     showStatus(`No ${genreName} movies found.`, 'warning');
     return;
@@ -245,17 +319,94 @@ function renderGenreResults(genreName, movies) {
             <h3 class="movie-card-title">${escapeHTML(movie.title)}</h3>
             ${year ? `<div class="movie-card-year">${escapeHTML(year)}</div>` : ''}
             <p class="movie-card-overview">${escapeHTML(movie.overview || 'No description available.')}</p>
-            <button type="button" class="btn btn-ghost btn-sm" data-title="${escapeHTML(movie.title)}">
-              View details
-            </button>
+            <div class="d-flex flex-wrap gap-2">
+              <button type="button" class="btn btn-ghost btn-sm" data-title="${escapeHTML(movie.title)}">
+                View details
+              </button>
+              <button type="button" class="btn btn-ghost btn-sm" data-streaming-title="${escapeHTML(movie.title)}">
+                Where to stream
+              </button>
+            </div>
+            <div class="streaming-results mt-2"></div>
           </div>
         </article>
       </div>`;
   }).join('');
 
-  $('movieResults').innerHTML = `
-    <h2 class="results-heading">Popular in <strong>${escapeHTML(genreName)}</strong></h2>
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-4">${cards}</div>`;
+  if (currentPage === 1) {
+    $('movieResults').innerHTML = `
+      <h2 class="results-heading">Popular in <strong>${escapeHTML(genreName)}</strong></h2>
+      <div id="genreResultsGrid" class="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-4"></div>`;
+  }
+  $('genreResultsGrid').insertAdjacentHTML('beforeend', cards);
+  $('loadMoreMovies')?.remove();
+
+  if (currentPage < totalPages) {
+    const button = document.createElement('button');
+    button.id = 'loadMoreMovies';
+    button.type = 'button';
+    button.className = 'btn btn-ghost mt-4';
+    button.textContent = 'Load more movies';
+    button.addEventListener('click', () => {
+      fetchMoviesByGenre(genreId, genreName, { save: false, page: currentPage + 1 });
+    });
+    $('movieResults').appendChild(button);
+  }
+}
+
+async function fetchStreamingOptions(title, container) {
+  container.textContent = 'Searching streaming services...';
+  if (!RAPIDAPI_KEY) {
+    container.textContent = 'Streaming search is not configured.';
+    return;
+  }
+
+  const url = new URL(`https://${STREAMING_API_HOST}/shows/search/title`);
+  url.searchParams.set('country', 'us');
+  url.searchParams.set('title', title);
+  url.searchParams.set('series_granularity', 'show');
+  url.searchParams.set('show_type', 'movie');
+  url.searchParams.set('output_language', 'en');
+
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'x-rapidapi-key': RAPIDAPI_KEY,
+        'x-rapidapi-host': STREAMING_API_HOST,
+      },
+    });
+    if (!response.ok) throw new Error(`Request failed (${response.status})`);
+    const data = await response.json();
+    const show = Array.isArray(data) ? data[0] : data;
+    const options = show?.streamingOptions?.us || [];
+    container.replaceChildren();
+
+    const links = options.filter((option) => {
+      try {
+        return new URL(option.link).protocol === 'https:';
+      } catch {
+        return false;
+      }
+    });
+
+    if (!links.length) {
+      container.textContent = 'No streaming options found.';
+      return;
+    }
+
+    links.forEach((option) => {
+      const link = document.createElement('a');
+      link.className = 'btn btn-ghost btn-sm me-2 mb-2';
+      link.href = option.link;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.textContent = option.service?.name || 'Watch';
+      container.appendChild(link);
+    });
+  } catch (error) {
+    console.error('Error fetching streaming options:', error);
+    container.textContent = 'Could not load streaming options. Please try again.';
+  }
 }
 
 function closeGenreModal() {
@@ -301,6 +452,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // "View details" on genre cards -> look the movie up on OMDb
   $('movieResults').addEventListener('click', (event) => {
+    const streamingButton = event.target.closest('[data-streaming-title]');
+    if (streamingButton) {
+      fetchStreamingOptions(
+        streamingButton.dataset.streamingTitle,
+        streamingButton.closest('.streaming-options')?.querySelector('.streaming-results') ||
+          streamingButton.closest('.movie-card-body').querySelector('.streaming-results')
+      );
+      return;
+    }
+
     const button = event.target.closest('[data-title]');
     if (button) {
       fetchMovieByTitle(button.dataset.title);
@@ -311,9 +472,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // Recent searches
   $('clearSearches').addEventListener('click', () => {
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(GENRE_STORAGE_KEY);
     renderRecentSearches();
+    renderGenreSearches();
   });
 
   renderRecentSearches();
+  renderGenreSearches();
   showEmptyState();
 });
