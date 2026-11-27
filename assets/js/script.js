@@ -1,348 +1,319 @@
-// Display movie details function
-function displayTitleMovies(movie, streamingOptions) {
-  const movieResultsEl = document.getElementById('movieResults');
-  const headerElement = document.createElement('h4');
-  headerElement.classList.add('movie-card-header');
-  headerElement.textContent = `Showing Results For: ${movie.Title}`;
-  movieResultsEl.innerHTML = '';
-  movieResultsEl.appendChild(headerElement);
-  
-  const movieHTML = `
-    <div class="card mb-4">
-      <div class="row g-0">
-        <div class="col-md-4">
-          <img src="${movie.Poster}" class="img-fluid rounded-start" alt="${movie.Title}">
-        </div>
-        <div class="col-md-8">
-          <div class="card-body">
-            <h5 class="card-title">${movie.Title}</h5>
-            <p class="card-text">Year: ${movie.Year}</p>
-            <p class="card-text">Genre: ${movie.Genre}</p>
-            <p class="card-text">🍅Rotten Tomatoes Score: ${movie.Ratings.find(rating => rating.Source === 'Rotten Tomatoes').Value}</p>
-            <p class="card-text">${movie.Plot}</p>
-            <button class="btn btn-info btn-sm" id="streamingOptionsBtn">Streaming Options</button>
-            <div id="streaming-options"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-  
-  movieResultsEl.innerHTML += movieHTML;
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-  document.getElementById('movieName').addEventListener('submit', function(event) {
-    event.preventDefault();
-
-    const movieTitle = document.getElementById('movieTitleInput').value.trim();
-    if (movieTitle === '') {
-      alert('Please enter a movie title');
-      return;
-    }
-  
-    const apiKey = 'af9c33c6';
-    const apiUrl = `https://www.omdbapi.com/?apikey=${apiKey}&t=${encodeURIComponent(movieTitle)}`;
-  
-    fetch(apiUrl)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.json();
-      })
-      .then(data => {
-        if (data.Response === 'False') {
-          throw new Error(data.Error || 'Movie not found');
-        }
-        displayTitleMovies(data); 
-        saveTitleSearch(movieTitle);
-        
-      })
-      .catch(error => {
-        console.error('Error fetching data:', error);
-        alert('Failed to fetch movie data. Please try again.');
-      });
-      
-      document.getElementById('movieTitleInput').value = '';  
-  });
-
-  displayPreviousTitleSearches();
-
-  function saveTitleSearch(movieTitle) {
-    let searches = JSON.parse(localStorage.getItem('titleSearches')) || [];
-    searches.push(movieTitle);
-    localStorage.setItem('titleSearches', JSON.stringify(searches));
-    displayPreviousTitleSearches();
-  }
-
-  function displayPreviousTitleSearches() {
-    const previousTitleSearchEl = document.getElementById('previous-title-searches');
-    previousTitleSearchEl.innerHTML = '';
-
-    let searches = JSON.parse(localStorage.getItem('titleSearches')) || [];
-    searches.forEach(search => {
-      const searchButton = document.createElement('button');
-      searchButton.classList.add('btn', 'btn-outline-secondary', 'mb-2', 'full-width-button');
-      searchButton.textContent = search;
-      searchButton.addEventListener('click', function() {
-        fetchMovieDetailsAndDisplay(search);
-      });
-
-      previousTitleSearchEl.appendChild(searchButton);
-    });
-  }
-
-  function fetchMovieDetailsAndDisplay(movieTitle) {
-    const apiKey = 'af9c33c6';
-    const apiUrl = `https://www.omdbapi.com/?apikey=${apiKey}&t=${encodeURIComponent(movieTitle)}`;
-  
-    fetch(apiUrl)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.json();
-      })
-      .then(data => {
-        if (data.Response === 'False') {
-          throw new Error(data.Error || 'Movie not found');
-        }
-        displayTitleMovies(data);
-      })
-      .catch(error => {
-        console.error('Error fetching data:', error);
-        alert('Failed to fetch movie data. Please try again.');
-      });
-  }
-  
-});
-// End of movie title and display functions
-
-// Get movie genre and display functions
-function displayGenreMovies(genreName, movies) {
-  const movieResultsElement = document.getElementById('movieResults');
-  movieResultsElement.innerHTML = '';
-
-  const headerElement = document.createElement('h5');
-  headerElement.textContent = `Showing Search Results For: ${genreName}`;
-  headerElement.classList.add('mb-4');
-  movieResultsElement.appendChild(headerElement);
-
-  const posterBaseUrl = 'https://image.tmdb.org/t/p/w500';
-  
-  movies.forEach(movie => {
-    const posterPath = movie.poster_path ? posterBaseUrl + movie.poster_path : 'https://via.placeholder.com/500x750?text=No+Poster';
-    const movieCard = `
-      <div class="card mb-4">
-        <div class="row">
-          <div class="col-md-4">
-            <img src="${posterPath}" class="img-fluid rounded-start" alt="${movie.title}">
-          </div>
-          <div class="col-md-8">
-            <div class="card-body">
-              <h5 class="card-title">${movie.title}</h5>
-              <p class="card-text">⭐️IMDb Rating: ${movie.vote_average}/10 </p>
-              <p class="card-text">${movie.overview}</p>
-             <button class="btn btn-info btn-sm" id="streamingOptionsBtn">Streaming Options</button>
-            <div id="streaming-options"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-
-    movieResultsElement.innerHTML += movieCard;
-  });
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-});
-
+// ===== Config =====
+// Keys come from the .env file (see .env.example). Vite swaps these in at build time.
+const OMDB_API_KEY = import.meta.env.VITE_OMDB_API_KEY;
+const RAPIDAPI_KEY = import.meta.env.VITE_RAPIDAPI_KEY;
+const RAPIDAPI_HOST = 'advanced-movie-search.p.rapidapi.com';
+const POSTER_BASE_URL = 'https://image.tmdb.org/t/p/w500';
+const STORAGE_KEY = 'titleSearches';
+const MAX_RECENT_SEARCHES = 8;
 
 const genreMapping = {
-  "Action": 28,
-  "Adventure": 12,
-  "Animation": 16,
-  "Comedy": 35,
-  "Crime": 80,
-  "Documentary": 99,
-  "Drama": 18,
-  "Family": 10751,
-  "Fantasy": 14,
-  "History": 36,
-  "Horror": 27,
-  "Music": 10402,
-  "Mystery": 9648,
-  "Romance": 10749,
-  "Science Fiction": 878,
-  "TV Movie": 10770,
-  "Thriller": 53,
-  "War": 10752,
-  "Western": 37
+  Action: 28,
+  Adventure: 12,
+  Animation: 16,
+  Comedy: 35,
+  Crime: 80,
+  Documentary: 99,
+  Drama: 18,
+  Family: 10751,
+  Fantasy: 14,
+  History: 36,
+  Horror: 27,
+  Music: 10402,
+  Mystery: 9648,
+  Romance: 10749,
+  'Science Fiction': 878,
+  'TV Movie': 10770,
+  Thriller: 53,
+  War: 10752,
+  Western: 37,
 };
 
+// ===== Helpers =====
+const $ = (id) => document.getElementById(id);
 
-document.addEventListener('DOMContentLoaded', function() {
-    const genreSelect = document.getElementById('movieGenre');
-    for (const genre in genreMapping) {
-      const genreId = genreMapping[genre];
-      genreSelect.innerHTML += `<option value="${genreId}">${genre}</option>`;
+function escapeHTML(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function hasValue(value) {
+  return value && value !== 'N/A';
+}
+
+function posterHTML(src, alt) {
+  if (!src) {
+    return `<div class="poster poster-placeholder" role="img" aria-label="No poster available">
+              <i class="fa-solid fa-film"></i>
+            </div>`;
+  }
+  return `<img src="${escapeHTML(src)}" class="poster" alt="${escapeHTML(alt)} poster" loading="lazy">`;
+}
+
+// ===== Status / loading / empty states =====
+function showStatus(message, type = 'danger') {
+  $('statusMessage').innerHTML = `
+    <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+      ${escapeHTML(message)}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>`;
+}
+
+function clearStatus() {
+  $('statusMessage').innerHTML = '';
+}
+
+function showLoading(label) {
+  $('movieResults').innerHTML = `
+    <div class="loading-state">
+      <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
+      <span>${escapeHTML(label)}</span>
+    </div>`;
+}
+
+function showEmptyState() {
+  $('movieResults').innerHTML = `
+    <div class="empty-state">
+      <i class="fa-solid fa-clapperboard d-block"></i>
+      <h3>Nothing playing yet</h3>
+      <p class="mb-0">Search for a title above or browse by genre to get started.</p>
+    </div>`;
+}
+
+// ===== Search by title (OMDb) =====
+async function fetchMovieByTitle(title, { save = true } = {}) {
+  clearStatus();
+  showLoading(`Searching for "${title}"...`);
+
+  try {
+    const url = `https://www.omdbapi.com/?apikey=${OMDB_API_KEY}&t=${encodeURIComponent(title)}`;
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Request failed (${response.status})`);
+
+    const data = await response.json();
+    if (data.Response === 'False') {
+      const notFound = /not found/i.test(data.Error || '');
+      throw new Error(
+        notFound ? `We couldn't find "${title}". Check the spelling and try again.` : data.Error
+      );
     }
-    
-    document.getElementById('taskForm').addEventListener('submit', function(event) {
-      event.preventDefault();
-  
-      const apiKey = '2155496cf9mshec9d20788864224p1f59bajsn1d032f45b0ba';
-      const baseApiUrl = 'https://advanced-movie-search.p.rapidapi.com/discover/movie?with_genres=';
-      const genreSelect = document.getElementById('movieGenre');
-      const selectedGenreId = genreSelect.value;
-  
-      if (!selectedGenreId) {
-        alert('Please select a movie genre.');
-        return;
-      }
 
-      const selectedOption = genreSelect.options[genreSelect.selectedIndex];
-      const genreName = selectedOption ? selectedOption.textContent : 'Unknown Genre';
-      const apiUrl = `${baseApiUrl}${selectedGenreId}&page=1`;
-  
-      fetchMoviesByGenre(apiKey, apiUrl, genreName);
+    renderTitleResult(data);
+    if (save) saveTitleSearch(data.Title);
+  } catch (error) {
+    console.error('Error fetching movie:', error);
+    showEmptyState();
+    showStatus(error.message || 'Something went wrong. Please try again.');
+  }
+}
 
-      document.getElementById('movieGenre').value = '';
-    });
+function renderTitleResult(movie) {
+  const rottenTomatoes = movie.Ratings?.find((r) => r.Source === 'Rotten Tomatoes')?.Value;
+  const poster = hasValue(movie.Poster) ? movie.Poster : null;
+  const genres = hasValue(movie.Genre) ? movie.Genre.split(',').map((g) => g.trim()) : [];
+
+  const meta = [movie.Year, movie.Rated, movie.Runtime]
+    .filter(hasValue)
+    .map((m) => `<span>${escapeHTML(m)}</span>`)
+    .join('');
+
+  const ratings = [
+    hasValue(movie.imdbRating) && { value: `${movie.imdbRating}/10`, source: 'IMDb' },
+    hasValue(rottenTomatoes) && { value: rottenTomatoes, source: 'Rotten Tomatoes' },
+    hasValue(movie.Metascore) && { value: movie.Metascore, source: 'Metacritic' },
+  ].filter(Boolean);
+
+  const credits = [
+    ['Director', movie.Director],
+    ['Starring', movie.Actors],
+  ].filter(([, value]) => hasValue(value));
+
+  $('movieResults').innerHTML = `
+    <h2 class="results-heading">Showing results for <strong>${escapeHTML(movie.Title)}</strong></h2>
+    <article class="movie-feature">
+      <div>${posterHTML(poster, movie.Title)}</div>
+      <div>
+        <h3 class="movie-feature-title">${escapeHTML(movie.Title)}</h3>
+        <div class="meta-line">${meta}</div>
+        <div>${genres.map((g) => `<span class="chip">${escapeHTML(g)}</span>`).join('')}</div>
+        ${ratings.length ? `
+          <div class="ratings">
+            ${ratings.map((r) => `
+              <div class="rating">
+                <div class="rating-value">${escapeHTML(r.value)}</div>
+                <div class="rating-source">${escapeHTML(r.source)}</div>
+              </div>`).join('')}
+          </div>` : ''}
+        ${hasValue(movie.Plot) ? `<p class="plot">${escapeHTML(movie.Plot)}</p>` : ''}
+        ${credits.length ? `
+          <dl class="credits">
+            ${credits.map(([label, value]) => `<dt>${label}</dt><dd>${escapeHTML(value)}</dd>`).join('')}
+          </dl>` : ''}
+      </div>
+    </article>`;
+}
+
+// ===== Recent searches (localStorage) =====
+function getRecentSearches() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+  } catch {
+    return [];
+  }
+}
+
+function saveTitleSearch(title) {
+  const searches = getRecentSearches().filter((s) => s.toLowerCase() !== title.toLowerCase());
+  searches.unshift(title);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(searches.slice(0, MAX_RECENT_SEARCHES)));
+  renderRecentSearches();
+}
+
+function renderRecentSearches() {
+  const listEl = $('previous-title-searches');
+  const searches = getRecentSearches();
+  $('clearSearches').classList.toggle('d-none', searches.length === 0);
+
+  if (!searches.length) {
+    listEl.innerHTML = '<p class="recent-empty">Your searches will show up here.</p>';
+    return;
+  }
+
+  listEl.innerHTML = '';
+  searches.forEach((search) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'recent-item';
+    button.textContent = search;
+    button.title = search;
+    button.addEventListener('click', () => fetchMovieByTitle(search, { save: false }));
+    listEl.appendChild(button);
   });
-  
-  function fetchMoviesByGenre(apiKey, apiUrl, genreName) {
-    fetch(apiUrl, {
+}
+
+// ===== Browse by genre (RapidAPI Advanced Movie Search) =====
+async function fetchMoviesByGenre(genreId, genreName) {
+  clearStatus();
+  showLoading(`Loading ${genreName} movies...`);
+
+  try {
+    const url = `https://${RAPIDAPI_HOST}/discover/movie?with_genres=${genreId}&page=1`;
+    const response = await fetch(url, {
       method: 'GET',
       headers: {
-        'x-rapidapi-key': apiKey,
-        'x-rapidapi-host': 'advanced-movie-search.p.rapidapi.com'
-      }
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Failed to fetch movie data. Server returned ' + response.status + ' ' + response.statusText);
-      }
-      return response.json();
-    })
-    .then(data => {
-      if (data.error) {
-        throw new Error(data.error.message || 'Movies not found');
-      }
-  
-      displayGenreMovies(genreName, data.results);
-      saveGenreSearch(apiUrl);
-      closeModal();
-    })
-    .catch(error => {
-      console.error('Error fetching data:', error);
-      alert('Failed to fetch movie data. Please try again later.');
+        'x-rapidapi-key': RAPIDAPI_KEY,
+        'x-rapidapi-host': RAPIDAPI_HOST,
+      },
     });
+    if (!response.ok) throw new Error(`Request failed (${response.status})`);
+
+    const data = await response.json();
+    if (data.error) throw new Error(data.error.message || 'No movies found');
+
+    renderGenreResults(genreName, data.results || []);
+  } catch (error) {
+    console.error('Error fetching genre:', error);
+    showEmptyState();
+    showStatus('We couldn’t load that genre right now. Please try again in a moment.');
   }
-  
-function fetchMoviesByGenre(apiKey, apiUrl) {
-  fetch(apiUrl, {
-    method: 'GET',
-    headers: {
-      'x-rapidapi-key': apiKey,
-      'x-rapidapi-host': 'advanced-movie-search.p.rapidapi.com'
+}
+
+function renderGenreResults(genreName, movies) {
+  if (!movies.length) {
+    showEmptyState();
+    showStatus(`No ${genreName} movies found.`, 'warning');
+    return;
+  }
+
+  const cards = movies.map((movie) => {
+    const poster = movie.poster_path ? POSTER_BASE_URL + movie.poster_path : null;
+    const year = movie.release_date ? movie.release_date.slice(0, 4) : '';
+    const score = typeof movie.vote_average === 'number' ? movie.vote_average.toFixed(1) : null;
+
+    return `
+      <div class="col">
+        <article class="movie-card">
+          <div class="poster-wrap">
+            ${posterHTML(poster, movie.title)}
+            ${score ? `<span class="score-badge"><i class="fa-solid fa-star me-1"></i>${score}</span>` : ''}
+          </div>
+          <div class="movie-card-body">
+            <h3 class="movie-card-title">${escapeHTML(movie.title)}</h3>
+            ${year ? `<div class="movie-card-year">${escapeHTML(year)}</div>` : ''}
+            <p class="movie-card-overview">${escapeHTML(movie.overview || 'No description available.')}</p>
+            <button type="button" class="btn btn-ghost btn-sm" data-title="${escapeHTML(movie.title)}">
+              View details
+            </button>
+          </div>
+        </article>
+      </div>`;
+  }).join('');
+
+  $('movieResults').innerHTML = `
+    <h2 class="results-heading">Popular in <strong>${escapeHTML(genreName)}</strong></h2>
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-4">${cards}</div>`;
+}
+
+function closeGenreModal() {
+  const modalEl = $('formModal');
+  bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+}
+
+// ===== Init =====
+document.addEventListener('DOMContentLoaded', () => {
+  if (!OMDB_API_KEY || !RAPIDAPI_KEY) {
+    console.warn('Missing API keys. Copy .env.example to .env and add your keys.');
+  }
+
+  // Title search
+  $('movieName').addEventListener('submit', (event) => {
+    event.preventDefault();
+    const input = $('movieTitleInput');
+    const title = input.value.trim();
+    if (!title) {
+      showStatus('Please enter a movie title.', 'warning');
+      input.focus();
+      return;
     }
-  })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Failed to fetch movie data. Server returned ' + response.status + ' ' + response.statusText);
-    }
-    return response.json();
-  })
-  .then(data => {
-    if (data.error) {
-      throw new Error(data.error.message || 'Movies not found');
-    }
-    
-    const genreSelect = document.getElementById('movieGenre');
-    const selectedOption = genreSelect.options[genreSelect.selectedIndex];
-    const genreName = selectedOption ? selectedOption.textContent : 'Unknown Genre';
-    
-    console.log(data);
-    displayGenreMovies(genreName, data.results);
-    saveGenreSearch(apiUrl);
-    closeModal();
-  })
-  .catch(error => {
-    console.error('Error fetching data:', error);
-    alert('Failed to fetch movie data. Please try again later.');
+    fetchMovieByTitle(title);
+    input.value = '';
   });
-}
 
+  // Genre dropdown + modal form
+  const genreSelect = $('movieGenre');
+  Object.entries(genreMapping).forEach(([name, id]) => {
+    genreSelect.add(new Option(name, id));
+  });
 
-function saveGenreSearch(genreUrl) {
-  let searches = JSON.parse(localStorage.getItem('genreSearches')) || [];
-  searches.push(genreUrl);
-  localStorage.setItem('genreSearches', JSON.stringify(searches));
-}
+  $('taskForm').addEventListener('submit', (event) => {
+    event.preventDefault();
+    const genreId = genreSelect.value;
+    if (!genreId) return;
+    const genreName = genreSelect.options[genreSelect.selectedIndex].textContent;
+    closeGenreModal();
+    fetchMoviesByGenre(genreId, genreName);
+    genreSelect.value = '';
+  });
 
-function closeModal() {
-  const modalElement = document.getElementById('formModal');
-  const modal = bootstrap.Modal.getInstance(modalElement);
-  modal.hide();
-}
-//End of search by genre and display functions
+  // "View details" on genre cards -> look the movie up on OMDb
+  $('movieResults').addEventListener('click', (event) => {
+    const button = event.target.closest('[data-title]');
+    if (button) {
+      fetchMovieByTitle(button.dataset.title);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  });
 
-// Get where to stream function
-// document.getElementById('movieName').addEventListener('submit', function(event) {
-//   event.preventDefault();
+  // Recent searches
+  $('clearSearches').addEventListener('click', () => {
+    localStorage.removeItem(STORAGE_KEY);
+    renderRecentSearches();
+  });
 
-//   const apiKey = '2155496cf9mshec9d20788864224p1f59bajsn1d032f45b0ba';
-//   const apiUrl = 'https://streaming-availability.p.rapidapi.com/shows/search/title';
-//   const movieName = document.getElementById('movieTitleInput').value;
-
-//   getStreaming(movieName, apiKey, apiUrl);
-// });
-
-
-// document.getElementById('movieName').addEventListener('submit', function(event) {
-//   event.preventDefault();
-
-//   const apiKey = '2155496cf9mshec9d20788864224p1f59bajsn1d032f45b0ba';
-//   const apiUrl = 'https://streaming-availability.p.rapidapi.com/shows/search/title';
-//   const movieName = document.getElementById('movieTitleInput').value;
-
-//   getStreaming(movieName, apiKey, apiUrl);
-// });
-
-// function getStreaming(movieName, apiKey, apiUrl) {
-//   const url = new URL(apiUrl);
-//   url.searchParams.append('country', 'us');
-//   url.searchParams.append('title', movieName);
-//   url.searchParams.append('series_granularity', 'show');
-//   url.searchParams.append('show_type', 'movie');
-//   url.searchParams.append('output_language', 'en');
-
-//   fetch(url, {
-//     method: 'GET',
-//     headers: {
-//       'x-rapidapi-key': apiKey,
-//       'x-rapidapi-host': 'streaming-availability.p.rapidapi.com',
-//     }
-//   })
-//   .then(response => {
-//     if (!response.ok) {
-//       throw new Error('Network response was not ok');
-//     }
-//     return response.json();
-//   })
-//   .then(data => {
-//     if (data.Response === 'False') {
-//       throw new Error(data.Error || 'Movies not found');
-//     } else {
-//       // Process the data here, like displaying streaming platforms
-//       console.log(data);
-//     }
-//   })
-//   .catch(error => {
-//     console.error('Error fetching data:', error);
-//     alert('Failed to fetch movie data. Please try again.');
-//   });
-// }
+  renderRecentSearches();
+  showEmptyState();
+});

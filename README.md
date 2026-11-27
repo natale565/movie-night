@@ -17,6 +17,20 @@
 - Past searches are saved to localStorage to revist and will be saved if page is closed.
 - Interactive page that will accept and respond to user input.
 
+# Running locally
+
+1. Install dependencies: `npm install`
+2. Copy `.env.example` to `.env` and add your own API keys:
+   - `VITE_OMDB_API_KEY` from [OMDb](https://www.omdbapi.com/apikey.aspx)
+   - `VITE_RAPIDAPI_KEY` from [RapidAPI](https://rapidapi.com/)
+3. Start the dev server: `npm run dev`
+
+`.env` is git-ignored, so keys never get committed. Note that this is a front-end-only app, so the keys are still included in the built JavaScript that the browser downloads.
+
+## Deploying
+
+The GitHub Actions workflow in `.github/workflows/deploy.yml` builds the site and publishes it to GitHub Pages on every push to `main`. Add `VITE_OMDB_API_KEY` and `VITE_RAPIDAPI_KEY` under **Settings > Secrets and variables > Actions**, and set **Settings > Pages > Source** to **GitHub Actions**.
+
 # Live webpage
 
 [Click here to view page!](https://natale565.github.io/movie-night/)
@@ -27,6 +41,7 @@
 - CSS
 - JavaScript
 - Bootstrap
+- Vite
 - Server-side APIs
 
 # API's used
